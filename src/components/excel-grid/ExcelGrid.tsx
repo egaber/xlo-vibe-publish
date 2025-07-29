@@ -28,7 +28,7 @@ interface Selection {
 }
 
 const GRID_ROWS = 100;
-const GRID_COLS = 26;
+const GRID_COLS = 39; // Extended to AM (A=1, B=2, ..., Z=26, AA=27, AB=28, ..., AM=39)
 
 const getColumnName = (index: number): string => {
   let result = '';
@@ -333,7 +333,7 @@ export const ExcelGrid = ({
               key={colIndex}
               className={`w-20 h-6 border-r border-b border-gray-300 flex items-center justify-center text-xs font-medium cursor-pointer select-none ${
                 isColSelected(colIndex)
-                  ? 'bg-[#aae2ce] text-[#127d42] border-b-[#127d42]'
+                  ? 'bg-[#c9e9d7] text-[#127d42] border-b-[#127d42]'
                   : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
               }`}
               onClick={() => {
@@ -356,7 +356,7 @@ export const ExcelGrid = ({
             <div
               className={`w-12 h-6 border-r border-b border-gray-300 flex items-center justify-end pr-2 text-sm font-medium cursor-pointer select-none sticky left-0 z-10 ${
                 isRowSelected(rowIndex)
-                  ? 'bg-[#aae2ce] text-[#127d42] border-r-[#127d42]'
+                  ? 'bg-[#c9e9d7] text-[#127d42] border-r-[#127d42]'
                   : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
               }`}
               onClick={() => {
