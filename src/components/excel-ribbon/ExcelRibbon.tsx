@@ -1,0 +1,422 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { RibbonTab } from "./RibbonTab";
+import { RibbonGroup } from "./RibbonGroup";
+import { RibbonDropdown } from "./RibbonDropdown";
+import { CompactRibbonGroup } from "./CompactRibbonGroup";
+import { FontDropdown } from "./FontDropdown";
+import { FontSizeDropdown } from "./FontSizeDropdown";
+import { BorderDropdown } from "./BorderDropdown";
+import { ColorPicker } from "./ColorPicker";
+import { ClipboardDropdown } from "./ClipboardDropdown";
+import { FontDropdownMobile } from "./FontDropdownMobile";
+import { AlignmentDropdownMobile } from "./AlignmentDropdownMobile";
+import { NumberDropdownMobile } from "./NumberDropdownMobile";
+import { StylesDropdownMobile } from "./StylesDropdownMobile";
+import { CellsDropdownMobile } from "./CellsDropdownMobile";
+import { EditingDropdownMobile } from "./EditingDropdownMobile";
+import { SensitivityDropdownMobile } from "./SensitivityDropdownMobile";
+import { CopilotDropdownMobile } from "./CopilotDropdownMobile";
+import { 
+  UndoIcon,
+  RedoIcon,
+  ClipboardIcon,
+  CopyIcon,
+  CutIcon,
+  FormatPainterIcon,
+  BoldIcon,
+  ItalicIcon,
+  UnderlineIcon,
+  DoubleUnderlineIcon,
+  StrikeThroughIcon,
+  AlignLeftIcon,
+  AlignCenterIcon,
+  AlignRightIcon,
+  AlignJustifyIcon,
+  AlignTopIcon,
+  AlignMiddleIcon,
+  AlignBottomIcon,
+  AlignTextLeftIcon,
+  AlignTextCenterIcon,
+  AlignTextRightIcon,
+  PlusIcon,
+  MinusIcon,
+  PercentIcon,
+  HashIcon,
+  TypeIcon,
+  PaletteIcon,
+  SettingsIcon,
+  SearchIcon,
+  CalculatorIcon,
+  ChevronDownIcon,
+  SaveIcon,
+  ShareIcon,
+  EyeIcon,
+  FileSpreadsheetIcon,
+  DecreaseIndentIcon,
+  IncreaseIndentIcon,
+  OrientationIcon,
+  MergeIcon,
+  BordersIcon,
+  FillColorIcon,
+  FontIncrementIcon,
+  FontDecrementIcon,
+  AccountingIcon,
+  CommaIcon,
+  DecreaseDecimalIcon,
+  IncreaseDecimalIcon,
+  ConditionalFormattingIcon,
+  CopilotIcon,
+  LargeSensitivityIcon,
+  LargeCopilotIcon
+} from "./icons";
+
+export const ExcelRibbon = () => {
+  const [activeTab, setActiveTab] = useState("Home");
+
+  const tabs = ["File", "Home", "Insert", "Page Layout", "Formulas", "Data", "Review", "View", "Help"];
+
+  return (
+    <div className="w-full bg-gray-50">
+      {/* Tab Navigation */}
+      <div className="flex items-center justify-between bg-gray-50">
+        <div className="flex">
+          {tabs.map((tab) => (
+            <RibbonTab
+              key={tab}
+              active={activeTab === tab}
+              onClick={() => setActiveTab(tab)}
+            >
+              {tab}
+            </RibbonTab>
+          ))}
+        </div>
+        
+        {/* Right-aligned peripheral controls */}
+        <div className="flex items-center gap-1 pr-2">
+          {/* Share Button */}
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-6 px-3 text-xs flex items-center gap-2 bg-green-700 text-white hover:bg-green-950 rounded-[4px]"
+          >
+            <img src="/icons/share icon.png" alt="Share" className="w-4 h-4" />
+            <span>Share</span>
+            <svg width="12" height="12" viewBox="0 0 12 12" className="ml-1">
+              <path d="M6 9L1.5 4.5L3 3L6 6L9 3L10.5 4.5L6 9Z" fill="currentColor" />
+            </svg>
+          </Button>
+        </div>
+      </div>
+
+      {/* Ribbon Content */}
+      {activeTab === "Home" && (
+        <>
+          {/* Desktop View */}
+          <div className="hidden lg:flex bg-white rounded-[10px] shadow-md mx-2 mb-2 px-2 py-2">
+            {/* Undo/Redo Group */}
+            <RibbonGroup title="Undo">
+              <div className="flex flex-col gap-0.5">
+                <Button variant="ghost" className="h-6 w-6 p-0 hover:bg-blue-50">
+                  <UndoIcon className="w-4 h-4" />
+                </Button>
+                <Button variant="ghost" className="h-6 w-6 p-0 hover:bg-blue-50">
+                  <RedoIcon className="w-4 h-4" />
+                </Button>
+              </div>
+            </RibbonGroup>
+
+            {/* Clipboard Group */}
+            <RibbonGroup title="Clipboard">
+              <div className="flex items-center gap-1">
+                <div className="flex flex-col">
+                  <Button variant="ghost" size="sm" className="h-14 w-14 flex-col p-1 hover:bg-blue-50">
+                    <ClipboardIcon className="w-8 h-9 mb-1" />
+                    <span className="text-xs">Paste</span>
+                  </Button>
+                </div>
+                <div className="flex flex-col gap-0.5">
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                    <CutIcon className="w-4 h-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                    <CopyIcon className="w-4 h-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                    <FormatPainterIcon className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </RibbonGroup>
+
+            {/* Font Group */}
+            <RibbonGroup title="Font">
+              <div className="flex flex-col gap-1">
+                {/* Row 1: Font name and size */}
+                <div className="flex items-center gap-1">
+                  <select className="text-xs border rounded-[4px] px-2 py-1 w-28 h-6">
+                    <option>Calibri</option>
+                    <option>Arial</option>
+                    <option>Times New Roman</option>
+                  </select>
+                  <select className="text-xs border rounded px-2 py-1 w-14 h-6">
+                    <option>11</option>
+                    <option>12</option>
+                    <option>14</option>
+                  </select>
+                </div>
+                
+                {/* Row 2: B, I, U, double underline, strikethrough, and font size controls */}
+                <div className="flex items-center gap-0.5">
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                    <BoldIcon className="w-4 h-5" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                    <ItalicIcon className="w-4 h-5" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                    <UnderlineIcon className="w-4 h-7" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                    <DoubleUnderlineIcon className="w-6 h-6" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                    <StrikeThroughIcon className="w-5 h-5" />
+                  </Button>
+                  <div className="w-px h-4 bg-gray-300 mx-1" />
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                    <FontIncrementIcon className="w-5 h-5" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                    <FontDecrementIcon className="w-5 h-5" />
+                  </Button>
+                </div>
+                
+                {/* Row 3: Borders, fill color, text color */}
+                <div className="flex items-center gap-0.5">
+                  <Button variant="ghost" size="sm" className="h-6 w-14 p-0 hover:bg-blue-50 flex items-center justify-start pl-1 relative">
+                    <BordersIcon className="w-6 h-6" />
+                    <ChevronDownIcon className="w-3 h-3 absolute bottom-1 right-3" />
+                  </Button>
+                  <ColorPicker type="background" defaultColor="#FFFF00" />
+                  <ColorPicker type="text" defaultColor="#FF0000" />
+                </div>
+              </div>
+            </RibbonGroup>
+
+            {/* Alignment Group */}
+            <RibbonGroup title="Alignment">
+              <div className="flex flex-col gap-1">
+                {/* Row 1: Align top, middle, bottom */}
+                <div className="flex items-center gap-0.5">
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                    <AlignTopIcon className="w-5 h-5" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                    <AlignMiddleIcon className="w-5 h-5" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                    <AlignBottomIcon className="w-5 h-5" />
+                  </Button>
+                </div>
+                
+                {/* Row 2: Align text left, center, right */}
+                <div className="flex items-center gap-0.5">
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                    <AlignTextLeftIcon className="w-5 h-5" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                    <AlignTextCenterIcon className="w-5 h-5" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                    <AlignTextRightIcon className="w-5 h-5" />
+                  </Button>
+                </div>
+                
+                {/* Row 3: Decrease indent, increase indent, orientation */}
+                <div className="flex items-center gap-0.5">
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                    <DecreaseIndentIcon className="w-4 h-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                    <IncreaseIndentIcon className="w-4 h-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                    <OrientationIcon className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </RibbonGroup>
+
+            {/* Number Group */}
+            <RibbonGroup title="Number">
+              <div className="flex flex-col gap-1">
+                {/* Row 1: Format dropdown */}
+                <select className="text-xs border rounded px-2 py-1 w-24 h-6">
+                  <option>General</option>
+                  <option>Number</option>
+                  <option>Currency</option>
+                  <option>Percentage</option>
+                </select>
+                
+                {/* Row 2: Accounting, Percentage, Comma, Decrease/Increase Decimal */}
+                <div className="flex items-center gap-0.5">
+                  <Button variant="ghost" size="sm" className="h-6 w-8 p-0 hover:bg-blue-50 flex items-center justify-start pl-1 relative">
+                    <AccountingIcon className="w-6 h-6" />
+                    <ChevronDownIcon className="w-2 h-2 absolute bottom-0 right-3" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                    <PercentIcon className="w-4 h-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                    <CommaIcon className="w-6 h-7" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                    <DecreaseDecimalIcon className="w-8 h-8" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                    <IncreaseDecimalIcon className="w-8 h-8" />
+                  </Button>
+                </div>
+              </div>
+            </RibbonGroup>
+
+            {/* Styles Group */}
+            <RibbonGroup title="Styles">
+              <div className="flex flex-col gap-0.5">
+                {/* Row 1: Conditional Formatting */}
+                <Button variant="ghost" size="sm" className="h-6 w-40 p-1 text-xs justify-start hover:bg-blue-50 flex items-center relative">
+                  <ConditionalFormattingIcon className="w-4 h-4 mr-2" />
+                  <span>Conditional Formatting</span>
+                  <ChevronDownIcon className="w-3 h-3 absolute bottom-0 right-1" />
+                </Button>
+                
+                {/* Row 2: Format as Table */}
+                <Button variant="ghost" size="sm" className="h-6 w-40 p-1 text-xs justify-start hover:bg-blue-50 flex items-center relative">
+                  <HashIcon className="w-4 h-4 mr-2" />
+                  <span>Format as Table</span>
+                  <ChevronDownIcon className="w-3 h-3 absolute bottom-0 right-1" />
+                </Button>
+                
+                {/* Row 3: Cell Styles */}
+                <Button variant="ghost" size="sm" className="h-6 w-40 p-1 text-xs justify-start hover:bg-blue-50 flex items-center relative">
+                  <PaletteIcon className="w-4 h-4 mr-2" />
+                  <span>Cell Styles</span>
+                  <ChevronDownIcon className="w-3 h-3 absolute bottom-0 right-1" />
+                </Button>
+              </div>
+            </RibbonGroup>
+
+            {/* Cells Group */}
+            <RibbonGroup title="Cells">
+              <div className="flex flex-col gap-0.5">
+                <Button variant="ghost" size="sm" className="h-6 w-20 p-1 text-xs justify-start hover:bg-blue-50">
+                  <PlusIcon className="w-5 h-5 mr-1" />
+                  Insert
+                </Button>
+                <Button variant="ghost" size="sm" className="h-6 w-20 p-1 text-xs justify-start hover:bg-blue-50">
+                  <MinusIcon className="w-5 h-5 mr-1" />
+                  Delete
+                </Button>
+                <Button variant="ghost" size="sm" className="h-6 w-20 p-1 text-xs justify-start hover:bg-blue-50">
+                  <PaletteIcon className="w-5 h-5 mr-1" />
+                  Format
+                </Button>
+              </div>
+            </RibbonGroup>
+
+            {/* Editing Group */}
+            <RibbonGroup title="Editing">
+              <div className="flex flex-col gap-0.5">
+                <Button variant="ghost" size="sm" className="h-6 w-24 p-1 text-xs justify-start hover:bg-blue-50">
+                  <CalculatorIcon className="w-3 h-3 mr-1" />
+                  AutoSum
+                  <ChevronDownIcon className="w-2 h-2 ml-auto" />
+                </Button>
+                <Button variant="ghost" size="sm" className="h-6 w-24 p-1 text-xs justify-start hover:bg-blue-50">
+                  <PaletteIcon className="w-3 h-3 mr-1" />
+                  Fill
+                  <ChevronDownIcon className="w-2 h-2 ml-auto" />
+                </Button>
+                <Button variant="ghost" size="sm" className="h-6 w-24 p-1 text-xs justify-start hover:bg-blue-50">
+                  <SearchIcon className="w-3 h-3 mr-1" />
+                  Find & Select
+                  <ChevronDownIcon className="w-2 h-2 ml-auto" />
+                </Button>
+              </div>
+            </RibbonGroup>
+
+            {/* Sensitivity Group */}
+            <RibbonGroup title="Sensitivity">
+              <div className="flex flex-col items-center">
+                <Button variant="ghost" size="sm" className="h-14 w-14 flex-col p-1 hover:bg-blue-50">
+                  <LargeSensitivityIcon className="w-8 h-8 mb-1" />
+                  <span className="text-xs">Sensitivity</span>
+                </Button>
+              </div>
+            </RibbonGroup>
+
+            {/* Copilot Group */}
+            <RibbonGroup title="Copilot">
+              <div className="flex flex-col items-center">
+                <Button variant="ghost" size="sm" className="h-14 w-14 flex-col p-1 hover:bg-blue-50 relative">
+                  <LargeCopilotIcon className="w-8 h-8 mb-1" />
+                  <span className="text-xs">Copilot</span>
+                  <ChevronDownIcon className="w-3 h-3 absolute bottom-0 right-1" />
+                </Button>
+              </div>
+            </RibbonGroup>
+          </div>
+
+          {/* Mobile/Tablet Compact View */}
+          <div className="flex lg:hidden bg-white rounded-md shadow-md mx-2 mb-2 px-2 py-2 gap-2">
+            {/* Undo/Redo Group - Same as desktop */}
+            <RibbonGroup title="Undo">
+              <div className="flex flex-col gap-0.5">
+                <Button variant="ghost" className="h-6 w-6 p-0 hover:bg-blue-50">
+                  <UndoIcon className="w-4 h-4" />
+                </Button>
+                <Button variant="ghost" className="h-6 w-6 p-0 hover:bg-blue-50">
+                  <RedoIcon className="w-4 h-4" />
+                </Button>
+              </div>
+            </RibbonGroup>
+
+            {/* Clipboard Group - Same as desktop */}
+            <RibbonGroup title="Clipboard">
+              <div className="flex items-center gap-1">
+                <div className="flex flex-col">
+                  <Button variant="ghost" size="sm" className="h-14 w-14 flex-col p-1 hover:bg-blue-50">
+                    <ClipboardIcon className="w-8 h-9 mb-1" />
+                    <span className="text-xs">Paste</span>
+                  </Button>
+                </div>
+                <div className="flex flex-col gap-0.5">
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                    <CutIcon className="w-4 h-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                    <CopyIcon className="w-4 h-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                    <FormatPainterIcon className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </RibbonGroup>
+
+            {/* Other groups as dropdowns with chevrons */}
+            <FontDropdownMobile />
+            <AlignmentDropdownMobile />
+            <NumberDropdownMobile />
+            <StylesDropdownMobile />
+            <CellsDropdownMobile />
+            <EditingDropdownMobile />
+            <SensitivityDropdownMobile />
+            <CopilotDropdownMobile />
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
