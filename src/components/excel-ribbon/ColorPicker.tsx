@@ -15,13 +15,14 @@ const standardColors = [
 interface ColorPickerProps {
   selectedColor?: string;
   onColorChange?: (color: string) => void;
+  onButtonClick?: () => void;
   defaultColor?: string;
   type: "background" | "text";
 }
 
-export const ColorPicker = ({ selectedColor, onColorChange, defaultColor, type }: ColorPickerProps) => {
+export const ColorPicker = ({ selectedColor, onColorChange, onButtonClick, defaultColor, type }: ColorPickerProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [currentColor, setCurrentColor] = useState(selectedColor || defaultColor);
+  const [currentColor, setCurrentColor] = useState(selectedColor || defaultColor || (type === "background" ? "#FFFF00" : "#FF0000"));
 
   const handleColorSelect = (color: string) => {
     setCurrentColor(color);
@@ -29,18 +30,42 @@ export const ColorPicker = ({ selectedColor, onColorChange, defaultColor, type }
     setIsOpen(false);
   };
 
+  const handleButtonClick = () => {
+    if (onButtonClick) {
+      onButtonClick();
+    } else {
+      // Use current color for button click
+      onColorChange?.(currentColor);
+    }
+  };
+
   return (
     <div className="flex flex-col items-start">
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
-        <PopoverTrigger asChild>
-          <Button variant="ghost" size="sm" className="h-6 w-14 p-0 hover:bg-blue-50 flex items-center justify-start pl-1 relative">
-            {type === "background" ? 
-              <FillColorIcon className="w-5 h-5" /> : 
-              <span className="text-s text-gray-500">A</span>
-            }
-            <ChevronDownIcon className="w-3 h-3 absolute bottom-0 right-3" />
-          </Button>
-        </PopoverTrigger>
+      <div className="flex items-center">
+        {/* Main button - applies current color */}
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="h-6 w-10 p-0 hover:bg-blue-50 flex items-center justify-center"
+          onClick={handleButtonClick}
+        >
+          {type === "background" ? 
+            <FillColorIcon className="w-5 h-5" /> : 
+            <span className="text-sm font-bold text-gray-700">A</span>
+          }
+        </Button>
+        
+        {/* Dropdown chevron - opens color palette */}
+        <Popover open={isOpen} onOpenChange={setIsOpen}>
+          <PopoverTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-6 w-4 p-0 hover:bg-blue-50 flex items-center justify-center"
+            >
+              <ChevronDownIcon className="w-3 h-3" />
+            </Button>
+          </PopoverTrigger>
         <PopoverContent className="w-[240px] p-3 bg-white border border-gray-200 shadow-lg" align="start">
           <div className="space-y-3">
             {/* Automatic Color */}
@@ -110,7 +135,8 @@ export const ColorPicker = ({ selectedColor, onColorChange, defaultColor, type }
             </div>
           </div>
         </PopoverContent>
-      </Popover>
+        </Popover>
+      </div>
       
       {/* Color indicator rectangle */}
       <div 

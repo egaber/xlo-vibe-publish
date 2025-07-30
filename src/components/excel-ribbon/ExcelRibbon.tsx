@@ -78,8 +78,20 @@ interface ExcelRibbonProps {
 
 export const ExcelRibbon = ({ ribbonActions }: ExcelRibbonProps) => {
   const [activeTab, setActiveTab] = useState("Home");
+  const [currentTextColor, setCurrentTextColor] = useState("#FF0000");
+  const [currentBackgroundColor, setCurrentBackgroundColor] = useState("#FFFF00");
 
   const tabs = ["File", "Home", "Insert", "Page Layout", "Formulas", "Data", "Review", "View", "Help"];
+
+  const handleTextColorChange = (color: string) => {
+    setCurrentTextColor(color);
+    ribbonActions.setTextColor(color);
+  };
+
+  const handleBackgroundColorChange = (color: string) => {
+    setCurrentBackgroundColor(color);
+    ribbonActions.setBackgroundColor(color);
+  };
 
   return (
     <div className="w-full bg-gray-50">
@@ -218,8 +230,20 @@ export const ExcelRibbon = ({ ribbonActions }: ExcelRibbonProps) => {
                     <BordersIcon className="w-6 h-6" />
                     <ChevronDownIcon className="w-3 h-3 absolute bottom-1 right-3" />
                   </Button>
-                  <ColorPicker type="background" defaultColor="#FFFF00" onColorChange={ribbonActions.setBackgroundColor} />
-                  <ColorPicker type="text" defaultColor="#FF0000" onColorChange={ribbonActions.setTextColor} />
+                  <ColorPicker 
+                    type="background" 
+                    defaultColor="#FFFF00" 
+                    selectedColor={currentBackgroundColor}
+                    onColorChange={handleBackgroundColorChange}
+                    onButtonClick={() => ribbonActions.setBackgroundColor(currentBackgroundColor)}
+                  />
+                  <ColorPicker 
+                    type="text" 
+                    defaultColor="#FF0000" 
+                    selectedColor={currentTextColor}
+                    onColorChange={handleTextColorChange}
+                    onButtonClick={() => ribbonActions.setTextColor(currentTextColor)}
+                  />
                 </div>
               </div>
             </RibbonGroup>

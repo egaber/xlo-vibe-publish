@@ -57,12 +57,30 @@ export const applyCellFormat = (
   const existingData = cellData || { value: '' };
   const existingFormat = existingData.format || {};
   
+  // Deep merge formatting properties to prevent overriding
+  const mergedFormat: CellFormat = {
+    ...existingFormat,
+    ...newFormat
+  };
+  
+  // Special handling for nested objects
+  if (newFormat.borders && existingFormat.borders) {
+    mergedFormat.borders = {
+      ...existingFormat.borders,
+      ...newFormat.borders
+    };
+  }
+  
+  if (newFormat.numberFormat && existingFormat.numberFormat) {
+    mergedFormat.numberFormat = {
+      ...existingFormat.numberFormat,
+      ...newFormat.numberFormat
+    };
+  }
+  
   return {
     ...existingData,
-    format: {
-      ...existingFormat,
-      ...newFormat
-    }
+    format: mergedFormat
   };
 };
 
