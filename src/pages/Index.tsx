@@ -6,11 +6,14 @@ import { ExcelGrid } from "@/components/excel-grid/ExcelGrid";
 import { SheetTabBar, Sheet } from "@/components/excel-grid/SheetTabBar";
 import { StatusBar } from "@/components/excel-grid/StatusBar";
 import { evaluateFormula, FormulaContext } from "@/utils/formulaEngine";
-
-interface CellData {
-  value: string;
-  formula?: string;
-}
+import { CellData, ClipboardData, Selection, RibbonActions, CellFormat } from "@/types/cellTypes";
+import { 
+  getSelectionCellRefs, 
+  applyCellFormat, 
+  createClipboardData, 
+  applyClipboardData,
+  getCellRef 
+} from "@/utils/cellFormatting";
 
 interface SheetData {
   cellData: Record<string, CellData>;
@@ -44,6 +47,15 @@ const Index = () => {
   const [isFormulaBuildingMode, setIsFormulaBuildingMode] = useState(false);
   const [formulaReferences, setFormulaReferences] = useState<FormulaReference[]>([]);
   const [rangeSelectionStart, setRangeSelectionStart] = useState<string | null>(null);
+  
+  // Clipboard state
+  const [clipboardData, setClipboardData] = useState<ClipboardData | null>(null);
+  
+  // Selection state for ribbon operations
+  const [currentSelection, setCurrentSelection] = useState<Selection>({
+    start: { row: 0, col: 0 },
+    end: { row: 0, col: 0 }
+  });
   
   // Colors for formula references
   const referenceColors = [
@@ -311,12 +323,241 @@ const Index = () => {
     ));
   };
 
+  // Ribbon Actions Implementation
+  const ribbonActions: RibbonActions = {
+    // Clipboard operations
+    copy: () => {
+      const data = createClipboardData(cellData, currentSelection, 'copy');
+      setClipboardData(data);
+    },
+
+    paste: () => {
+      if (!clipboardData) return;
+      const newCellData = applyClipboardData(cellData, clipboardData, currentSelection);
+      updateCurrentSheetData({ cellData: newCellData });
+    },
+
+    cut: () => {
+      const data = createClipboardData(cellData, currentSelection, 'cut');
+      setClipboardData(data);
+    },
+
+    // Font formatting
+    toggleBold: () => {
+      const cellRefs = getSelectionCellRefs(currentSelection);
+      const newCellData = { ...cellData };
+      
+      cellRefs.forEach(ref => {
+        const currentCell = newCellData[ref];
+        const isBold = currentCell?.format?.bold;
+        newCellData[ref] = applyCellFormat(currentCell, { bold: !isBold });
+      });
+      
+      updateCurrentSheetData({ cellData: newCellData });
+    },
+
+    toggleItalic: () => {
+      const cellRefs = getSelectionCellRefs(currentSelection);
+      const newCellData = { ...cellData };
+      
+      cellRefs.forEach(ref => {
+        const currentCell = newCellData[ref];
+        const isItalic = currentCell?.format?.italic;
+        newCellData[ref] = applyCellFormat(currentCell, { italic: !isItalic });
+      });
+      
+      updateCurrentSheetData({ cellData: newCellData });
+    },
+
+    toggleUnderline: () => {
+      const cellRefs = getSelectionCellRefs(currentSelection);
+      const newCellData = { ...cellData };
+      
+      cellRefs.forEach(ref => {
+        const currentCell = newCellData[ref];
+        const isUnderline = currentCell?.format?.underline;
+        newCellData[ref] = applyCellFormat(currentCell, { underline: !isUnderline });
+      });
+      
+      updateCurrentSheetData({ cellData: newCellData });
+    },
+
+    setFontFamily: (family: string) => {
+      const cellRefs = getSelectionCellRefs(currentSelection);
+      const newCellData = { ...cellData };
+      
+      cellRefs.forEach(ref => {
+        const currentCell = newCellData[ref];
+        newCellData[ref] = applyCellFormat(currentCell, { fontFamily: family });
+      });
+      
+      updateCurrentSheetData({ cellData: newCellData });
+    },
+
+    setFontSize: (size: number) => {
+      const cellRefs = getSelectionCellRefs(currentSelection);
+      const newCellData = { ...cellData };
+      
+      cellRefs.forEach(ref => {
+        const currentCell = newCellData[ref];
+        newCellData[ref] = applyCellFormat(currentCell, { fontSize: size });
+      });
+      
+      updateCurrentSheetData({ cellData: newCellData });
+    },
+
+    increaseFontSize: () => {
+      const cellRefs = getSelectionCellRefs(currentSelection);
+      const newCellData = { ...cellData };
+      
+      cellRefs.forEach(ref => {
+        const currentCell = newCellData[ref];
+        const currentSize = currentCell?.format?.fontSize || 11;
+        newCellData[ref] = applyCellFormat(currentCell, { fontSize: currentSize + 1 });
+      });
+      
+      updateCurrentSheetData({ cellData: newCellData });
+    },
+
+    decreaseFontSize: () => {
+      const cellRefs = getSelectionCellRefs(currentSelection);
+      const newCellData = { ...cellData };
+      
+      cellRefs.forEach(ref => {
+        const currentCell = newCellData[ref];
+        const currentSize = currentCell?.format?.fontSize || 11;
+        newCellData[ref] = applyCellFormat(currentCell, { fontSize: Math.max(8, currentSize - 1) });
+      });
+      
+      updateCurrentSheetData({ cellData: newCellData });
+    },
+
+    // Colors
+    setTextColor: (color: string) => {
+      const cellRefs = getSelectionCellRefs(currentSelection);
+      const newCellData = { ...cellData };
+      
+      cellRefs.forEach(ref => {
+        const currentCell = newCellData[ref];
+        newCellData[ref] = applyCellFormat(currentCell, { textColor: color });
+      });
+      
+      updateCurrentSheetData({ cellData: newCellData });
+    },
+
+    setBackgroundColor: (color: string) => {
+      const cellRefs = getSelectionCellRefs(currentSelection);
+      const newCellData = { ...cellData };
+      
+      cellRefs.forEach(ref => {
+        const currentCell = newCellData[ref];
+        newCellData[ref] = applyCellFormat(currentCell, { backgroundColor: color });
+      });
+      
+      updateCurrentSheetData({ cellData: newCellData });
+    },
+
+    // Alignment
+    setHorizontalAlignment: (align: 'left' | 'center' | 'right') => {
+      const cellRefs = getSelectionCellRefs(currentSelection);
+      const newCellData = { ...cellData };
+      
+      cellRefs.forEach(ref => {
+        const currentCell = newCellData[ref];
+        newCellData[ref] = applyCellFormat(currentCell, { horizontalAlign: align });
+      });
+      
+      updateCurrentSheetData({ cellData: newCellData });
+    },
+
+    setVerticalAlignment: (align: 'top' | 'middle' | 'bottom') => {
+      const cellRefs = getSelectionCellRefs(currentSelection);
+      const newCellData = { ...cellData };
+      
+      cellRefs.forEach(ref => {
+        const currentCell = newCellData[ref];
+        newCellData[ref] = applyCellFormat(currentCell, { verticalAlign: align });
+      });
+      
+      updateCurrentSheetData({ cellData: newCellData });
+    },
+
+    // Number formatting
+    setNumberFormat: (format: CellFormat['numberFormat']) => {
+      const cellRefs = getSelectionCellRefs(currentSelection);
+      const newCellData = { ...cellData };
+      
+      cellRefs.forEach(ref => {
+        const currentCell = newCellData[ref];
+        newCellData[ref] = applyCellFormat(currentCell, { numberFormat: format });
+      });
+      
+      updateCurrentSheetData({ cellData: newCellData });
+    },
+
+    increaseDecimals: () => {
+      const cellRefs = getSelectionCellRefs(currentSelection);
+      const newCellData = { ...cellData };
+      
+      cellRefs.forEach(ref => {
+        const currentCell = newCellData[ref];
+        const currentFormat = currentCell?.format?.numberFormat;
+        const currentDecimals = currentFormat?.decimals || 0;
+        newCellData[ref] = applyCellFormat(currentCell, { 
+          numberFormat: { 
+            ...currentFormat,
+            type: currentFormat?.type || 'number',
+            decimals: currentDecimals + 1 
+          }
+        });
+      });
+      
+      updateCurrentSheetData({ cellData: newCellData });
+    },
+
+    decreaseDecimals: () => {
+      const cellRefs = getSelectionCellRefs(currentSelection);
+      const newCellData = { ...cellData };
+      
+      cellRefs.forEach(ref => {
+        const currentCell = newCellData[ref];
+        const currentFormat = currentCell?.format?.numberFormat;
+        const currentDecimals = currentFormat?.decimals || 0;
+        newCellData[ref] = applyCellFormat(currentCell, { 
+          numberFormat: { 
+            ...currentFormat,
+            type: currentFormat?.type || 'number',
+            decimals: Math.max(0, currentDecimals - 1) 
+          }
+        });
+      });
+      
+      updateCurrentSheetData({ cellData: newCellData });
+    },
+
+    // Undo/Redo (basic implementation for now)
+    undo: () => {
+      // TODO: Implement proper undo/redo with history stack
+      console.log('Undo functionality needs implementation');
+    },
+
+    redo: () => {
+      // TODO: Implement proper undo/redo with history stack
+      console.log('Redo functionality needs implementation');
+    }
+  };
+
+  // Handle selection updates from ExcelGrid
+  const handleSelectionChange = (selection: Selection) => {
+    setCurrentSelection(selection);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Fixed header area - stays at top */}
       <div className="flex-shrink-0">
         <ExcelTopBar />
-        <ExcelRibbon />
+        <ExcelRibbon ribbonActions={ribbonActions} />
         <FormulaBar
           selectedCell={selectedCell}
           cellValue={selectedCellValue}
@@ -337,6 +578,7 @@ const Index = () => {
           formulaReferences={formulaReferences}
           rangeSelectionStart={rangeSelectionStart}
           onCellClickInFormulaMode={handleCellClickInFormulaMode}
+          onSelectionChange={handleSelectionChange}
         />
       </div>
       

@@ -1,10 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { evaluateFormula, FormulaContext } from "@/utils/formulaEngine";
-
-interface CellData {
-  value: string;
-  formula?: string;
-}
+import { CellData, Selection } from "@/types/cellTypes";
+import { getCellStyles, formatCellValue } from "@/utils/cellFormatting";
 
 interface FormulaReference {
   id: string;
@@ -20,11 +17,7 @@ interface ExcelGridProps {
   formulaReferences?: FormulaReference[];
   rangeSelectionStart?: string | null;
   onCellClickInFormulaMode?: (cellRef: string, isRangeSelection?: boolean) => void;
-}
-
-interface Selection {
-  start: { row: number; col: number };
-  end: { row: number; col: number };
+  onSelectionChange?: (selection: Selection) => void;
 }
 
 const GRID_ROWS = 100;
@@ -59,7 +52,8 @@ export const ExcelGrid = ({
   isFormulaBuildingMode = false,
   formulaReferences = [],
   rangeSelectionStart = null,
-  onCellClickInFormulaMode
+  onCellClickInFormulaMode,
+  onSelectionChange
 }: ExcelGridProps) => {
   const [selection, setSelection] = useState<Selection>({
     start: { row: 0, col: 0 },
@@ -307,7 +301,8 @@ export const ExcelGrid = ({
     const cellRef = getCellRef(selection.start.row, selection.start.col);
     const cellInfo = cellData[cellRef] || { value: "" };
     onCellSelect(currentSelection, cellInfo.value);
-  }, [selection, cellData, onCellSelect]);
+    onSelectionChange?.(selection);
+  }, [selection, cellData, onCellSelect, onSelectionChange]);
 
   useEffect(() => {
     document.addEventListener('mouseup', handleMouseUp);
@@ -383,17 +378,25 @@ export const ExcelGrid = ({
               const formulaRef = isInFormulaReference(cellRef);
               const isRangeStart = rangeSelectionStart === cellRef;
               
-              // Determine background color
+              // Get cell formatting styles
+              const cellStyles = getCellStyles(cellInfo.format);
+              const formattedValue = formatCellValue(cellInfo.value, cellInfo.format);
+              
+              // Determine background color and styles
               let bgColor = 'bg-white hover:bg-gray-50';
+              let cellStyle: React.CSSProperties = { ...cellStyles };
+              
               if (isSelected) {
                 bgColor = 'bg-[#e8f2ec]';
               } else if (formulaRef) {
-                // Convert hex color to RGB with opacity
-                const hex = formulaRef.color.replace('#', '');
-                const r = parseInt(hex.substring(0, 2), 16);
-                const g = parseInt(hex.substring(2, 4), 16);
-                const b = parseInt(hex.substring(4, 6), 16);
-                bgColor = `bg-white hover:bg-gray-50`;
+                // Override with formula reference styling
+                cellStyle = {
+                  ...cellStyle,
+                  backgroundColor: `rgba(${parseInt(formulaRef.color.slice(1, 3), 16)}, ${parseInt(formulaRef.color.slice(3, 5), 16)}, ${parseInt(formulaRef.color.slice(5, 7), 16)}, 0.3)`,
+                  borderColor: formulaRef.color,
+                  borderWidth: '2px',
+                  borderStyle: 'solid'
+                };
               } else if (isRangeStart) {
                 bgColor = 'bg-blue-100';
               }
@@ -402,12 +405,7 @@ export const ExcelGrid = ({
                 <div
                   key={colIndex}
                   className={`w-20 h-6 border-r border-b border-gray-300 relative cursor-cell ${bgColor} ${rangeBorders}`}
-                  style={formulaRef ? {
-                    backgroundColor: `rgba(${parseInt(formulaRef.color.slice(1, 3), 16)}, ${parseInt(formulaRef.color.slice(3, 5), 16)}, ${parseInt(formulaRef.color.slice(5, 7), 16)}, 0.3)`,
-                    borderColor: formulaRef.color,
-                    borderWidth: '2px',
-                    borderStyle: 'solid'
-                  } : {}}
+                  style={cellStyle}
                   onMouseDown={() => handleMouseDown(rowIndex, colIndex)}
                   onMouseOver={() => handleMouseOver(rowIndex, colIndex)}
                   onDoubleClick={() => handleCellDoubleClick(rowIndex, colIndex)}
@@ -428,11 +426,15 @@ export const ExcelGrid = ({
                         }
                       }}
                       className="w-full h-full px-1 text-xs border-0 outline-none bg-transparent"
+                      style={cellStyles}
                       autoFocus
                     />
                   ) : (
-                    <div className="w-full h-full px-1 text-xs flex items-center overflow-hidden">
-                      {cellInfo.value}
+                    <div 
+                      className="w-full h-full px-1 text-xs flex items-center overflow-hidden"
+                      style={cellStyles}
+                    >
+                      {formattedValue}
                     </div>
                   )}
                 </div>

@@ -17,6 +17,7 @@ import { CellsDropdownMobile } from "./CellsDropdownMobile";
 import { EditingDropdownMobile } from "./EditingDropdownMobile";
 import { SensitivityDropdownMobile } from "./SensitivityDropdownMobile";
 import { CopilotDropdownMobile } from "./CopilotDropdownMobile";
+import { RibbonActions } from "@/types/cellTypes";
 import { 
   UndoIcon,
   RedoIcon,
@@ -71,7 +72,11 @@ import {
   LargeCopilotIcon
 } from "./icons";
 
-export const ExcelRibbon = () => {
+interface ExcelRibbonProps {
+  ribbonActions: RibbonActions;
+}
+
+export const ExcelRibbon = ({ ribbonActions }: ExcelRibbonProps) => {
   const [activeTab, setActiveTab] = useState("Home");
 
   const tabs = ["File", "Home", "Insert", "Page Layout", "Formulas", "Data", "Review", "View", "Help"];
@@ -117,10 +122,10 @@ export const ExcelRibbon = () => {
             {/* Undo/Redo Group */}
             <RibbonGroup title="Undo">
               <div className="flex flex-col gap-0.5">
-                <Button variant="ghost" className="h-6 w-6 p-0 hover:bg-blue-50">
+                <Button variant="ghost" className="h-6 w-6 p-0 hover:bg-blue-50" onClick={ribbonActions.undo}>
                   <UndoIcon className="w-4 h-4" />
                 </Button>
-                <Button variant="ghost" className="h-6 w-6 p-0 hover:bg-blue-50">
+                <Button variant="ghost" className="h-6 w-6 p-0 hover:bg-blue-50" onClick={ribbonActions.redo}>
                   <RedoIcon className="w-4 h-4" />
                 </Button>
               </div>
@@ -130,16 +135,16 @@ export const ExcelRibbon = () => {
             <RibbonGroup title="Clipboard">
               <div className="flex items-center gap-1">
                 <div className="flex flex-col">
-                  <Button variant="ghost" size="sm" className="h-14 w-14 flex-col p-1 hover:bg-blue-50">
+                  <Button variant="ghost" size="sm" className="h-14 w-14 flex-col p-1 hover:bg-blue-50" onClick={ribbonActions.paste}>
                     <ClipboardIcon className="w-8 h-9 mb-1" />
                     <span className="text-xs">Paste</span>
                   </Button>
                 </div>
                 <div className="flex flex-col gap-0.5">
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50" onClick={ribbonActions.cut}>
                     <CutIcon className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50" onClick={ribbonActions.copy}>
                     <CopyIcon className="w-4 h-4" />
                   </Button>
                   <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
@@ -154,27 +159,42 @@ export const ExcelRibbon = () => {
               <div className="flex flex-col gap-1">
                 {/* Row 1: Font name and size */}
                 <div className="flex items-center gap-1">
-                  <select className="text-xs border rounded-[4px] px-2 py-1 w-28 h-6">
-                    <option>Calibri</option>
-                    <option>Arial</option>
-                    <option>Times New Roman</option>
+                  <select 
+                    className="text-xs border rounded-[4px] px-2 py-1 w-28 h-6"
+                    onChange={(e) => ribbonActions.setFontFamily(e.target.value)}
+                  >
+                    <option value="Calibri">Calibri</option>
+                    <option value="Arial">Arial</option>
+                    <option value="Times New Roman">Times New Roman</option>
+                    <option value="Helvetica">Helvetica</option>
+                    <option value="Georgia">Georgia</option>
                   </select>
-                  <select className="text-xs border rounded px-2 py-1 w-14 h-6">
-                    <option>11</option>
-                    <option>12</option>
-                    <option>14</option>
+                  <select 
+                    className="text-xs border rounded px-2 py-1 w-14 h-6"
+                    onChange={(e) => ribbonActions.setFontSize(parseInt(e.target.value))}
+                  >
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                    <option value="14">14</option>
+                    <option value="16">16</option>
+                    <option value="18">18</option>
+                    <option value="20">20</option>
+                    <option value="24">24</option>
                   </select>
                 </div>
                 
                 {/* Row 2: B, I, U, double underline, strikethrough, and font size controls */}
                 <div className="flex items-center gap-0.5">
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50" onClick={ribbonActions.toggleBold}>
                     <BoldIcon className="w-4 h-5" />
                   </Button>
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50" onClick={ribbonActions.toggleItalic}>
                     <ItalicIcon className="w-4 h-5" />
                   </Button>
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50" onClick={ribbonActions.toggleUnderline}>
                     <UnderlineIcon className="w-4 h-7" />
                   </Button>
                   <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
@@ -184,10 +204,10 @@ export const ExcelRibbon = () => {
                     <StrikeThroughIcon className="w-5 h-5" />
                   </Button>
                   <div className="w-px h-4 bg-gray-300 mx-1" />
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50" onClick={ribbonActions.increaseFontSize}>
                     <FontIncrementIcon className="w-5 h-5" />
                   </Button>
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50" onClick={ribbonActions.decreaseFontSize}>
                     <FontDecrementIcon className="w-5 h-5" />
                   </Button>
                 </div>
@@ -198,8 +218,8 @@ export const ExcelRibbon = () => {
                     <BordersIcon className="w-6 h-6" />
                     <ChevronDownIcon className="w-3 h-3 absolute bottom-1 right-3" />
                   </Button>
-                  <ColorPicker type="background" defaultColor="#FFFF00" />
-                  <ColorPicker type="text" defaultColor="#FF0000" />
+                  <ColorPicker type="background" defaultColor="#FFFF00" onColorChange={ribbonActions.setBackgroundColor} />
+                  <ColorPicker type="text" defaultColor="#FF0000" onColorChange={ribbonActions.setTextColor} />
                 </div>
               </div>
             </RibbonGroup>
@@ -209,26 +229,26 @@ export const ExcelRibbon = () => {
               <div className="flex flex-col gap-1">
                 {/* Row 1: Align top, middle, bottom */}
                 <div className="flex items-center gap-0.5">
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50" onClick={() => ribbonActions.setVerticalAlignment('top')}>
                     <AlignTopIcon className="w-5 h-5" />
                   </Button>
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50" onClick={() => ribbonActions.setVerticalAlignment('middle')}>
                     <AlignMiddleIcon className="w-5 h-5" />
                   </Button>
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50" onClick={() => ribbonActions.setVerticalAlignment('bottom')}>
                     <AlignBottomIcon className="w-5 h-5" />
                   </Button>
                 </div>
                 
                 {/* Row 2: Align text left, center, right */}
                 <div className="flex items-center gap-0.5">
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50" onClick={() => ribbonActions.setHorizontalAlignment('left')}>
                     <AlignTextLeftIcon className="w-5 h-5" />
                   </Button>
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50" onClick={() => ribbonActions.setHorizontalAlignment('center')}>
                     <AlignTextCenterIcon className="w-5 h-5" />
                   </Button>
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50" onClick={() => ribbonActions.setHorizontalAlignment('right')}>
                     <AlignTextRightIcon className="w-5 h-5" />
                   </Button>
                 </div>
@@ -252,29 +272,60 @@ export const ExcelRibbon = () => {
             <RibbonGroup title="Number">
               <div className="flex flex-col gap-1">
                 {/* Row 1: Format dropdown */}
-                <select className="text-xs border rounded px-2 py-1 w-24 h-6">
-                  <option>General</option>
-                  <option>Number</option>
-                  <option>Currency</option>
-                  <option>Percentage</option>
+                <select 
+                  className="text-xs border rounded px-2 py-1 w-24 h-6"
+                  onChange={(e) => {
+                    const formatType = e.target.value as 'general' | 'number' | 'currency' | 'percentage';
+                    ribbonActions.setNumberFormat({ type: formatType, decimals: 2 });
+                  }}
+                >
+                  <option value="general">General</option>
+                  <option value="number">Number</option>
+                  <option value="currency">Currency</option>
+                  <option value="percentage">Percentage</option>
                 </select>
                 
                 {/* Row 2: Accounting, Percentage, Comma, Decrease/Increase Decimal */}
                 <div className="flex items-center gap-0.5">
-                  <Button variant="ghost" size="sm" className="h-6 w-8 p-0 hover:bg-blue-50 flex items-center justify-start pl-1 relative">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-6 w-8 p-0 hover:bg-blue-50 flex items-center justify-start pl-1 relative"
+                    onClick={() => ribbonActions.setNumberFormat({ type: 'accounting', decimals: 2 })}
+                  >
                     <AccountingIcon className="w-6 h-6" />
                     <ChevronDownIcon className="w-2 h-2 absolute bottom-0 right-3" />
                   </Button>
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-6 w-6 p-0 hover:bg-blue-50"
+                    onClick={() => ribbonActions.setNumberFormat({ type: 'percentage', decimals: 2 })}
+                  >
                     <PercentIcon className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-6 w-6 p-0 hover:bg-blue-50"
+                    onClick={() => ribbonActions.setNumberFormat({ type: 'number', decimals: 0, useThousandsSeparator: true })}
+                  >
                     <CommaIcon className="w-6 h-7" />
                   </Button>
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-6 w-6 p-0 hover:bg-blue-50"
+                    onClick={ribbonActions.decreaseDecimals}
+                  >
                     <DecreaseDecimalIcon className="w-8 h-8" />
                   </Button>
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-6 w-6 p-0 hover:bg-blue-50"
+                    onClick={ribbonActions.increaseDecimals}
+                  >
                     <IncreaseDecimalIcon className="w-8 h-8" />
                   </Button>
                 </div>
