@@ -20,6 +20,7 @@ interface ExcelGridProps {
   onSelectionChange?: (selection: Selection) => void;
   onColumnSelect?: (colIndex: number) => void;
   externalSelection?: Selection;
+  onScroll?: (scrollLeft: number) => void;
 }
 
 const GRID_ROWS = 100;
@@ -57,7 +58,8 @@ export const ExcelGrid = ({
   onCellClickInFormulaMode,
   onSelectionChange,
   onColumnSelect,
-  externalSelection
+  externalSelection,
+  onScroll
 }: ExcelGridProps) => {
   const [selection, setSelection] = useState<Selection>({
     start: { row: 0, col: 0 },
@@ -318,6 +320,7 @@ export const ExcelGrid = ({
       className="h-full overflow-auto bg-white focus:outline-none select-none" 
       tabIndex={0}
       onKeyDown={handleKeyDown}
+      onScroll={(e) => onScroll?.(e.currentTarget.scrollLeft)}
       ref={gridRef}
     >
       <div className="inline-block min-w-full">
@@ -328,9 +331,12 @@ export const ExcelGrid = ({
             <div
               className={`w-12 h-6 border-r border-b border-gray-300 flex items-center justify-end pr-2 text-sm font-medium cursor-pointer select-none sticky left-0 z-10 ${
                 isRowSelected(rowIndex)
-                  ? 'bg-[#c9e9d7] text-[#127d42] border-r-[#127d42]'
+                  ? 'text-[#127d42] border-r-2 border-r-[#127d42]'
                   : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
               }`}
+              style={{
+                backgroundColor: isRowSelected(rowIndex) ? '#e8f2ec' : undefined
+              }}
               onClick={() => {
                 // Select entire row
                 setSelection({

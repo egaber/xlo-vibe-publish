@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import ExcelTopBar from "@/components/excel-ribbon/ExcelTopBar";
 import { ExcelRibbon } from "@/components/excel-ribbon/ExcelRibbon";
 import { FormulaBar } from "@/components/excel-grid/FormulaBar";
@@ -49,6 +49,10 @@ const Index = () => {
   const [formulaReferences, setFormulaReferences] = useState<FormulaReference[]>([]);
   const [rangeSelectionStart, setRangeSelectionStart] = useState<string | null>(null);
   
+  // Refs for scroll synchronization
+  const columnHeadersRef = useRef<HTMLDivElement>(null);
+  const gridContainerRef = useRef<HTMLDivElement>(null);
+  
   // Clipboard state
   const [clipboardData, setClipboardData] = useState<ClipboardData | null>(null);
   
@@ -79,6 +83,13 @@ const Index = () => {
         ...updates
       }
     }));
+  };
+
+  // Scroll synchronization handler
+  const handleGridScroll = (scrollLeft: number) => {
+    if (columnHeadersRef.current) {
+      columnHeadersRef.current.scrollLeft = scrollLeft;
+    }
   };
 
   const handleCellSelect = (cellRef: string, value: string) => {
@@ -578,13 +589,14 @@ const Index = () => {
           onFormulaEditEnd={handleFormulaEditEnd}
         />
         <ColumnHeaders 
+          ref={columnHeadersRef}
           selection={currentSelection}
           onColumnSelect={handleColumnSelect}
         />
       </div>
       
       {/* Scrollable content area */}
-      <div className="fixed top-[315px] left-0 right-0 bottom-0 overflow-hidden">
+      <div ref={gridContainerRef} className="fixed top-[315px] left-0 right-0 bottom-0 overflow-hidden">
         <ExcelGrid
           onCellSelect={handleCellSelect}
           cellData={cellData}
@@ -596,6 +608,7 @@ const Index = () => {
           onSelectionChange={handleSelectionChange}
           onColumnSelect={handleColumnSelect}
           externalSelection={currentSelection}
+          onScroll={handleGridScroll}
         />
       </div>
       

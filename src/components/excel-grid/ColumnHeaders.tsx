@@ -1,4 +1,5 @@
 import { Selection } from "@/types/cellTypes";
+import { forwardRef } from "react";
 
 interface ColumnHeadersProps {
   selection?: Selection;
@@ -17,34 +18,35 @@ const getColumnName = (index: number): string => {
   return result;
 };
 
-export const ColumnHeaders = ({ selection, onColumnSelect }: ColumnHeadersProps) => {
+export const ColumnHeaders = forwardRef<HTMLDivElement, ColumnHeadersProps>(({ selection, onColumnSelect }, ref) => {
   const isColSelected = (colIndex: number): boolean => {
     if (!selection) return false;
     const { start, end } = selection;
     const minCol = Math.min(start.col, end.col);
     const maxCol = Math.max(start.col, end.col);
-    const minRow = Math.min(start.row, end.row);
-    const maxRow = Math.max(start.row, end.row);
     
-    // Check if entire column is selected
-    return colIndex >= minCol && colIndex <= maxCol && minRow === 0 && maxRow === GRID_ROWS - 1;
+    // Check if this column is within the selected range
+    return colIndex >= minCol && colIndex <= maxCol;
   };
 
   return (
-    <div className="flex bg-white border-b border-gray-300 overflow-hidden">
+    <div ref={ref} className="flex bg-white border-b border-gray-300 overflow-x-auto scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
       {/* Top-left corner */}
       <div className="w-12 h-6 bg-gray-100 border-r border-gray-300 flex items-center justify-center text-xs font-medium flex-shrink-0 sticky left-0 z-10"></div>
       
       {/* Column Headers Container */}
-      <div className="flex overflow-x-auto scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+      <div className="flex" style={{ minWidth: 'max-content' }}>
         {Array.from({ length: GRID_COLS }, (_, colIndex) => (
           <div
             key={colIndex}
             className={`w-20 h-6 border-r border-gray-300 flex items-center justify-center text-xs font-medium cursor-pointer select-none flex-shrink-0 ${
               isColSelected(colIndex)
-                ? 'bg-[#c9e9d7] text-[#127d42] border-b-[#127d42]'
-                : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
+                ? 'text-[#127d42] border-b-2 border-b-[#127d42]'
+                : 'bg-gray-100 hover:bg-gray-200 text-gray-600 border-b border-b-gray-300'
             }`}
+            style={{
+              backgroundColor: isColSelected(colIndex) ? '#e8f2ec' : undefined
+            }}
             onClick={() => onColumnSelect(colIndex)}
           >
             {getColumnName(colIndex)}
@@ -53,4 +55,6 @@ export const ColumnHeaders = ({ selection, onColumnSelect }: ColumnHeadersProps)
       </div>
     </div>
   );
-};
+});
+
+ColumnHeaders.displayName = 'ColumnHeaders';
