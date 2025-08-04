@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { RibbonTab } from "./RibbonTab";
 import { RibbonGroup } from "./RibbonGroup";
 import { RibbonDropdown } from "./RibbonDropdown";
@@ -80,6 +83,8 @@ export const ExcelRibbon = ({ ribbonActions }: ExcelRibbonProps) => {
   const [activeTab, setActiveTab] = useState("Home");
   const [currentTextColor, setCurrentTextColor] = useState("#FF0000");
   const [currentBackgroundColor, setCurrentBackgroundColor] = useState("#FFFF00");
+  const [testDialogOpen, setTestDialogOpen] = useState(false);
+  const [testInputValue, setTestInputValue] = useState("");
 
   const tabs = ["File", "Home", "Insert", "Page Layout", "Formulas", "Data", "Review", "View", "Help"];
 
@@ -91,6 +96,18 @@ export const ExcelRibbon = ({ ribbonActions }: ExcelRibbonProps) => {
   const handleBackgroundColorChange = (color: string) => {
     setCurrentBackgroundColor(color);
     ribbonActions.setBackgroundColor(color);
+  };
+
+  const handleTestSubmit = () => {
+    // Handle the test input submission here
+    console.log("Test input:", testInputValue);
+    setTestDialogOpen(false);
+    setTestInputValue("");
+  };
+
+  const handleTestCancel = () => {
+    setTestDialogOpen(false);
+    setTestInputValue("");
   };
 
   return (
@@ -439,6 +456,78 @@ export const ExcelRibbon = ({ ribbonActions }: ExcelRibbonProps) => {
                   <span className="text-xs">Copilot</span>
                   <ChevronDownIcon className="w-3 h-3 absolute bottom-0 right-1" />
                 </Button>
+              </div>
+            </RibbonGroup>
+
+            {/* Test Group */}
+            <RibbonGroup title="Test">
+              <div className="flex flex-col items-center">
+                <Dialog open={testDialogOpen} onOpenChange={setTestDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-14 w-14 flex-col p-1 hover:bg-gray-50">
+                      <div className="text-2xl mb-1">🧪</div>
+                      <span className="text-xs">Test</span>
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px] bg-white border-0 rounded-3xl shadow-lg">
+                    <DialogHeader className="px-6 py-4">
+                      <DialogTitle className="text-[#127d42] text-lg font-medium">Find and Replace</DialogTitle>
+                      <DialogDescription className="text-gray-600 text-sm">
+                        Enter your search criteria below.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="px-6 py-2">
+                      <div className="space-y-4">
+                        <div className="flex items-center space-x-3">
+                          <Label htmlFor="find-input" className="text-gray-700 text-sm font-medium min-w-[80px]">
+                            Find what:
+                          </Label>
+                          <Input
+                            id="find-input"
+                            value={testInputValue}
+                            onChange={(e) => setTestInputValue(e.target.value)}
+                            className="flex-1 border-gray-300 rounded-xl focus:border-[#127d42] focus:ring-0 focus:outline-none selection:bg-pink-200"
+                            placeholder="Enter search text..."
+                          />
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <Label htmlFor="replace-input" className="text-gray-700 text-sm font-medium min-w-[80px]">
+                            Replace with:
+                          </Label>
+                          <Input
+                            id="replace-input"
+                            className="flex-1 border-gray-300 rounded-xl focus:border-[#127d42] focus:ring-0 focus:outline-none selection:bg-pink-200"
+                            placeholder="Enter replacement text..."
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <DialogFooter className="px-6 pb-6 pt-4 flex justify-end space-x-3">
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={handleTestCancel}
+                        className="border-gray-300 text-gray-700 hover:bg-gray-50 rounded-xl"
+                      >
+                        Cancel
+                      </Button>
+                      <Button 
+                        type="submit" 
+                        onClick={handleTestSubmit}
+                        className="bg-[#127d42] hover:bg-[#0f6937] text-white rounded-xl border-0"
+                      >
+                        Find All
+                      </Button>
+                      <Button 
+                        type="submit" 
+                        onClick={handleTestSubmit}
+                        className="bg-[#127d42] hover:bg-[#0f6937] text-white rounded-xl border-0"
+                      >
+                        Replace All
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </div>
             </RibbonGroup>
           </div>

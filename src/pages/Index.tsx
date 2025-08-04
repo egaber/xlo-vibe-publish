@@ -3,6 +3,7 @@ import ExcelTopBar from "@/components/excel-ribbon/ExcelTopBar";
 import { ExcelRibbon } from "@/components/excel-ribbon/ExcelRibbon";
 import { FormulaBar } from "@/components/excel-grid/FormulaBar";
 import { ExcelGrid } from "@/components/excel-grid/ExcelGrid";
+import { ColumnHeaders } from "@/components/excel-grid/ColumnHeaders";
 import { SheetTabBar, Sheet } from "@/components/excel-grid/SheetTabBar";
 import { StatusBar } from "@/components/excel-grid/StatusBar";
 import { evaluateFormula, FormulaContext } from "@/utils/formulaEngine";
@@ -552,10 +553,20 @@ const Index = () => {
     setCurrentSelection(selection);
   };
 
+  // Handle column selection
+  const handleColumnSelect = (colIndex: number) => {
+    const GRID_ROWS = 100; // Should match the constant in ExcelGrid
+    const newSelection: Selection = {
+      start: { row: 0, col: colIndex },
+      end: { row: GRID_ROWS - 1, col: colIndex }
+    };
+    setCurrentSelection(newSelection);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Fixed header area - stays at top */}
-      <div className="flex-shrink-0">
+      <div className="fixed top-0 left-0 right-0 z-50 bg-gray-50 flex-shrink-0">
         <ExcelTopBar />
         <ExcelRibbon ribbonActions={ribbonActions} />
         <FormulaBar
@@ -566,10 +577,14 @@ const Index = () => {
           onFormulaEditStart={handleFormulaEditStart}
           onFormulaEditEnd={handleFormulaEditEnd}
         />
+        <ColumnHeaders 
+          selection={currentSelection}
+          onColumnSelect={handleColumnSelect}
+        />
       </div>
       
       {/* Scrollable content area */}
-      <div className="flex-1 overflow-hidden">
+      <div className="fixed top-[315px] left-0 right-0 bottom-0 overflow-hidden">
         <ExcelGrid
           onCellSelect={handleCellSelect}
           cellData={cellData}
@@ -579,6 +594,8 @@ const Index = () => {
           rangeSelectionStart={rangeSelectionStart}
           onCellClickInFormulaMode={handleCellClickInFormulaMode}
           onSelectionChange={handleSelectionChange}
+          onColumnSelect={handleColumnSelect}
+          externalSelection={currentSelection}
         />
       </div>
       

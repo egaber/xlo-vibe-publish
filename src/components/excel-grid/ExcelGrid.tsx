@@ -18,6 +18,8 @@ interface ExcelGridProps {
   rangeSelectionStart?: string | null;
   onCellClickInFormulaMode?: (cellRef: string, isRangeSelection?: boolean) => void;
   onSelectionChange?: (selection: Selection) => void;
+  onColumnSelect?: (colIndex: number) => void;
+  externalSelection?: Selection;
 }
 
 const GRID_ROWS = 100;
@@ -53,7 +55,9 @@ export const ExcelGrid = ({
   formulaReferences = [],
   rangeSelectionStart = null,
   onCellClickInFormulaMode,
-  onSelectionChange
+  onSelectionChange,
+  onColumnSelect,
+  externalSelection
 }: ExcelGridProps) => {
   const [selection, setSelection] = useState<Selection>({
     start: { row: 0, col: 0 },
@@ -311,39 +315,12 @@ export const ExcelGrid = ({
 
   return (
     <div 
-      className="flex-1 overflow-auto bg-white focus:outline-none" 
+      className="h-full overflow-auto bg-white focus:outline-none select-none" 
       tabIndex={0}
       onKeyDown={handleKeyDown}
       ref={gridRef}
     >
       <div className="inline-block min-w-full">
-        {/* Header Row */}
-        <div className="flex sticky top-0 z-10">
-          {/* Top-left corner */}
-          <div className="w-12 h-6 bg-gray-100 border-r border-b border-gray-300 flex items-center justify-center text-xs font-medium sticky left-0 z-20"></div>
-          
-          {/* Column Headers */}
-          {Array.from({ length: GRID_COLS }, (_, colIndex) => (
-            <div
-              key={colIndex}
-              className={`w-20 h-6 border-r border-b border-gray-300 flex items-center justify-center text-xs font-medium cursor-pointer select-none ${
-                isColSelected(colIndex)
-                  ? 'bg-[#c9e9d7] text-[#127d42] border-b-[#127d42]'
-                  : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
-              }`}
-              onClick={() => {
-                // Select entire column
-                setSelection({
-                  start: { row: 0, col: colIndex },
-                  end: { row: GRID_ROWS - 1, col: colIndex }
-                });
-              }}
-            >
-              {getColumnName(colIndex)}
-            </div>
-          ))}
-        </div>
-
         {/* Data Rows */}
         {Array.from({ length: GRID_ROWS }, (_, rowIndex) => (
           <div key={rowIndex} className="flex">
@@ -386,8 +363,15 @@ export const ExcelGrid = ({
               let bgColor = 'bg-white hover:bg-gray-50';
               let cellStyle: React.CSSProperties = { ...cellStyles };
               
-              if (isSelected) {
-                bgColor = 'bg-[#e8f2ec]';
+              if (isSelected && isActiveCell) {
+                // Only the active cell (top-left of selection) is transparent
+                bgColor = 'bg-transparent';
+              } else if (isSelected) {
+                // Other selected cells have selection background color
+                cellStyle = {
+                  ...cellStyle,
+                  backgroundColor: '#e8f2ec'
+                };
               } else if (formulaRef) {
                 // Override with formula reference styling
                 cellStyle = {
@@ -404,7 +388,7 @@ export const ExcelGrid = ({
               return (
                 <div
                   key={colIndex}
-                  className={`w-20 h-6 border-r border-b border-gray-300 relative cursor-cell ${bgColor} ${rangeBorders}`}
+                  className={`w-20 h-6 border-r border-b border-gray-300 relative cursor-cell select-none ${bgColor} ${rangeBorders}`}
                   style={cellStyle}
                   onMouseDown={() => handleMouseDown(rowIndex, colIndex)}
                   onMouseOver={() => handleMouseOver(rowIndex, colIndex)}
@@ -431,7 +415,7 @@ export const ExcelGrid = ({
                     />
                   ) : (
                     <div 
-                      className="w-full h-full px-1 text-xs flex items-center overflow-hidden"
+                      className="w-full h-full px-1 text-xs flex items-center overflow-hidden select-none"
                       style={cellStyles}
                     >
                       {formattedValue}

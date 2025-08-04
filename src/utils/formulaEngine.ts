@@ -71,16 +71,28 @@ export const FUNCTIONS: Record<string, (args: FunctionArg[], context: FormulaCon
         // Range reference
         const cells = parseRange(arg);
         for (const cellRef of cells) {
-          const value = parseFloat(context.getCellValue(cellRef)) || 0;
-          total += value;
+          const cellValue = context.getCellValue(cellRef);
+          const value = parseFloat(cellValue);
+          if (cellValue && cellValue.trim() !== '' && isNaN(value)) {
+            return '#ERROR!';
+          }
+          total += value || 0;
         }
       } else if (typeof arg === 'string' && parseCellRef(arg)) {
         // Single cell reference
-        const value = parseFloat(context.getCellValue(arg)) || 0;
-        total += value;
+        const cellValue = context.getCellValue(arg);
+        const value = parseFloat(cellValue);
+        if (cellValue && cellValue.trim() !== '' && isNaN(value)) {
+          return '#ERROR!';
+        }
+        total += value || 0;
       } else {
         // Literal value
-        total += parseFloat(String(arg)) || 0;
+        const value = parseFloat(String(arg));
+        if (isNaN(value)) {
+          return '#ERROR!';
+        }
+        total += value;
       }
     }
     return total;
@@ -239,7 +251,7 @@ export const FUNCTIONS: Record<string, (args: FunctionArg[], context: FormulaCon
   }
 };
 
-// Simple expression parser for basic arithmetic
+// Enhanced expression parser for arithmetic with proper operator precedence
 export const evaluateExpression = (expr: string, context: FormulaContext): string | number => {
   // Remove whitespace
   expr = expr.trim();
@@ -259,24 +271,107 @@ export const evaluateExpression = (expr: string, context: FormulaContext): strin
     return expr.slice(1, -1);
   }
   
-  // Handle simple arithmetic operations
-  const operators = ['+', '-', '*', '/'];
+  // Handle parentheses first
+  if (expr.includes('(') && expr.includes(')')) {
+    return evaluateExpressionWithParentheses(expr, context);
+  }
+  
+  // Handle arithmetic operations with proper precedence
+  return evaluateArithmeticExpression(expr, context);
+};
+
+// Helper function to handle expressions with parentheses
+const evaluateExpressionWithParentheses = (expr: string, context: FormulaContext): string | number => {
+  // Find innermost parentheses
+  let depth = 0;
+  let start = -1;
+  let end = -1;
+  
+  for (let i = 0; i < expr.length; i++) {
+    if (expr[i] === '(') {
+      if (depth === 0) {
+        start = i;
+      }
+      depth++;
+    } else if (expr[i] === ')') {
+      depth--;
+      if (depth === 0) {
+        end = i;
+        break;
+      }
+    }
+  }
+  
+  if (start !== -1 && end !== -1) {
+    const innerExpr = expr.substring(start + 1, end);
+    const innerResult = evaluateExpression(innerExpr, context);
+    const newExpr = expr.substring(0, start) + String(innerResult) + expr.substring(end + 1);
+    return evaluateExpression(newExpr, context);
+  }
+  
+  return evaluateArithmeticExpression(expr, context);
+};
+
+// Helper function to handle arithmetic with proper operator precedence
+const evaluateArithmeticExpression = (expr: string, context: FormulaContext): string | number => {
+  // First handle multiplication and division (left to right)
+  expr = handleOperators(expr, ['*', '/'], context);
+  
+  // Then handle addition and subtraction (left to right)
+  expr = handleOperators(expr, ['+', '-'], context);
+  
+  // If we end up with a single number, return it
+  if (!isNaN(parseFloat(expr))) {
+    return parseFloat(expr);
+  }
+  
+  return expr;
+};
+
+// Helper function to handle specific operators
+const handleOperators = (expr: string, operators: string[], context: FormulaContext): string => {
   for (const op of operators) {
-    const parts = expr.split(op);
-    if (parts.length === 2) {
-      const left = evaluateExpression(parts[0].trim(), context);
-      const right = evaluateExpression(parts[1].trim(), context);
+    let operatorIndex = -1;
+    
+    // Find the operator (from left to right)
+    for (let i = 0; i < expr.length; i++) {
+      if (expr[i] === op) {
+        // Make sure it's not a negative sign at the beginning
+        if (op === '-' && i === 0) continue;
+        // Make sure it's not a negative sign after another operator
+        if (op === '-' && i > 0 && ['+', '-', '*', '/'].includes(expr[i-1])) continue;
+        
+        operatorIndex = i;
+        break;
+      }
+    }
+    
+    if (operatorIndex !== -1) {
+      const left = expr.substring(0, operatorIndex).trim();
+      const right = expr.substring(operatorIndex + 1).trim();
       
-      const leftNum = parseFloat(String(left));
-      const rightNum = parseFloat(String(right));
+      const leftResult = evaluateExpression(left, context);
+      const rightResult = evaluateExpression(right, context);
+      
+      const leftNum = parseFloat(String(leftResult));
+      const rightNum = parseFloat(String(rightResult));
       
       if (!isNaN(leftNum) && !isNaN(rightNum)) {
+        let result: number;
         switch (op) {
-          case '+': return leftNum + rightNum;
-          case '-': return leftNum - rightNum;
-          case '*': return leftNum * rightNum;
-          case '/': return rightNum !== 0 ? leftNum / rightNum : '#DIV/0!';
+          case '+': result = leftNum + rightNum; break;
+          case '-': result = leftNum - rightNum; break;
+          case '*': result = leftNum * rightNum; break;
+          case '/': 
+            if (rightNum === 0) return '#DIV/0!';
+            result = leftNum / rightNum; 
+            break;
+          default: return expr;
         }
+        
+        // Replace the expression with the result and continue processing
+        const newExpr = String(result) + expr.substring(operatorIndex + right.length + 1);
+        return handleOperators(newExpr, operators, context);
       }
     }
   }
