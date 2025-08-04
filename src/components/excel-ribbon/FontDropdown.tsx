@@ -10,6 +10,7 @@ interface FontDropdownProps {
 }
 
 const fonts = [
+  "Aptos Narrow (Body)",
   "Aptos Narrow",
   "Arial", 
   "Calibri",
@@ -22,7 +23,7 @@ const fonts = [
   "Courier New"
 ];
 
-export const FontDropdown = ({ selectedFont = "Aptos Narrow", onFontChange }: FontDropdownProps) => {
+export const FontDropdown = ({ selectedFont = "Aptos Narrow (Body)", onFontChange }: FontDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (

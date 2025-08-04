@@ -11,7 +11,7 @@ interface FontSizeDropdownProps {
 
 const fontSizes = [8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 36, 40, 44, 48, 54, 60, 66, 72];
 
-export const FontSizeDropdown = ({ selectedSize = 11, onSizeChange }: FontSizeDropdownProps) => {
+export const FontSizeDropdown = ({ selectedSize = 14, onSizeChange }: FontSizeDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (

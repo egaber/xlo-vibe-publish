@@ -13,7 +13,8 @@ import {
   applyCellFormat, 
   createClipboardData, 
   applyClipboardData,
-  getCellRef 
+  getCellRef,
+  DEFAULT_CELL_FORMAT 
 } from "@/utils/cellFormatting";
 
 interface SheetData {
@@ -108,9 +109,16 @@ const Index = () => {
 
   const handleCellUpdate = (cellRef: string, data: CellData) => {
     const currentData = sheetDataMap[activeSheetId];
+    
+    // Ensure cell has default formatting if no format is specified
+    const cellDataWithDefaults = {
+      ...data,
+      format: data.format ? { ...DEFAULT_CELL_FORMAT, ...data.format } : DEFAULT_CELL_FORMAT
+    };
+    
     const updatedCellData = {
       ...currentData.cellData,
-      [cellRef]: data
+      [cellRef]: cellDataWithDefaults
     };
     
     updateCurrentSheetData({
@@ -118,7 +126,7 @@ const Index = () => {
       // Update the formula bar if this is the currently selected cell
       // Show formula if it exists, otherwise show the value
       ...(cellRef === currentData.selectedCell ? { 
-        selectedCellValue: data.formula || data.value 
+        selectedCellValue: cellDataWithDefaults.formula || cellDataWithDefaults.value 
       } : {})
     });
   };
@@ -232,7 +240,8 @@ const Index = () => {
     
     handleCellUpdate(selectedCell, {
       value: displayValue,
-      formula: isFormula ? valueToUse : undefined
+      formula: isFormula ? valueToUse : undefined,
+      format: cellData[selectedCell]?.format || DEFAULT_CELL_FORMAT
     });
   };
 
@@ -596,7 +605,7 @@ const Index = () => {
       </div>
       
       {/* Scrollable content area */}
-      <div ref={gridContainerRef} className="fixed top-[303px] left-0 right-0 bottom-0 overflow-hidden"> {/* Push div */}
+      <div ref={gridContainerRef} className="fixed top-[315px] left-0 right-0 bottom-0 overflow-hidden"> {/* Push div */}
         <ExcelGrid
           onCellSelect={handleCellSelect}
           cellData={cellData}

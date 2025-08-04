@@ -420,14 +420,32 @@ export const ExcelGrid = ({
                           setEditValue("");
                         }
                       }}
-                      className="w-full h-full px-1 text-xs border-0 outline-none bg-transparent"
-                      style={cellStyles}
+                      className="w-full h-full px-1 border-0 outline-none bg-transparent"
+                      style={{
+                        ...cellStyles,
+                        fontSize: cellStyles.fontSize || '14px',
+                        fontFamily: cellStyles.fontFamily || '"Aptos Narrow (Body)", "Segoe UI", system-ui, sans-serif',
+                        display: 'flex',
+                        alignItems: 'center',
+                        boxSizing: 'border-box',
+                        margin: 0,
+                        padding: '0 4px',
+                        lineHeight: '1.2'
+                      }}
                       autoFocus
                     />
                   ) : (
                     <div 
-                      className="w-full h-full px-1 text-xs flex items-center overflow-hidden select-none"
-                      style={cellStyles}
+                      className="w-full h-full px-1 flex items-center overflow-hidden select-none"
+                      style={{
+                        ...cellStyles,
+                        fontSize: cellStyles.fontSize || '14px',
+                        fontFamily: cellStyles.fontFamily || '"Aptos Narrow (Body)", "Segoe UI", system-ui, sans-serif',
+                        boxSizing: 'border-box',
+                        margin: 0,
+                        padding: '0 4px',
+                        lineHeight: '1.2'
+                      }}
                     >
                       {formattedValue}
                       {/* Fill handle - small square at bottom-right of selection */}

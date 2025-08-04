@@ -59,6 +59,7 @@ export const applyCellFormat = (
   
   // Deep merge formatting properties to prevent overriding
   const mergedFormat: CellFormat = {
+    ...DEFAULT_CELL_FORMAT,
     ...existingFormat,
     ...newFormat
   };
@@ -84,45 +85,52 @@ export const applyCellFormat = (
   };
 };
 
+// Default formatting values
+export const DEFAULT_CELL_FORMAT: Partial<CellFormat> = {
+  fontFamily: '"Aptos Narrow (Body)", "Segoe UI", system-ui, sans-serif',
+  fontSize: 14
+};
+
 // Generate CSS styles from cell format
 export const getCellStyles = (format?: CellFormat): React.CSSProperties => {
-  if (!format) return {};
+  // Apply default formatting first, then override with specific format
+  const effectiveFormat = { ...DEFAULT_CELL_FORMAT, ...format };
   
   const styles: React.CSSProperties = {};
   
   // Font properties
-  if (format.fontFamily) styles.fontFamily = format.fontFamily;
-  if (format.fontSize) styles.fontSize = `${format.fontSize}px`;
-  if (format.bold) styles.fontWeight = 'bold';
-  if (format.italic) styles.fontStyle = 'italic';
+  if (effectiveFormat.fontFamily) styles.fontFamily = effectiveFormat.fontFamily;
+  if (effectiveFormat.fontSize) styles.fontSize = `${effectiveFormat.fontSize}px`;
+  if (effectiveFormat.bold) styles.fontWeight = 'bold';
+  if (effectiveFormat.italic) styles.fontStyle = 'italic';
   
   // Text decoration
   const decorations: string[] = [];
-  if (format.underline) decorations.push('underline');
-  if (format.strikethrough) decorations.push('line-through');
+  if (effectiveFormat.underline) decorations.push('underline');
+  if (effectiveFormat.strikethrough) decorations.push('line-through');
   if (decorations.length > 0) styles.textDecoration = decorations.join(' ');
   
   // Colors
-  if (format.textColor) styles.color = format.textColor;
-  if (format.backgroundColor) styles.backgroundColor = format.backgroundColor;
+  if (effectiveFormat.textColor) styles.color = effectiveFormat.textColor;
+  if (effectiveFormat.backgroundColor) styles.backgroundColor = effectiveFormat.backgroundColor;
   
   // Alignment
-  if (format.horizontalAlign) styles.textAlign = format.horizontalAlign;
-  if (format.verticalAlign) {
+  if (effectiveFormat.horizontalAlign) styles.textAlign = effectiveFormat.horizontalAlign;
+  if (effectiveFormat.verticalAlign) {
     styles.display = 'flex';
-    styles.alignItems = format.verticalAlign === 'top' ? 'flex-start' : 
-                       format.verticalAlign === 'bottom' ? 'flex-end' : 'center';
+    styles.alignItems = effectiveFormat.verticalAlign === 'top' ? 'flex-start' : 
+                       effectiveFormat.verticalAlign === 'bottom' ? 'flex-end' : 'center';
   }
   
   // Borders
-  if (format.borders) {
-    const borderColor = format.borders.color || '#000000';
-    const borderStyle = format.borders.style || 'solid';
+  if (effectiveFormat.borders) {
+    const borderColor = effectiveFormat.borders.color || '#000000';
+    const borderStyle = effectiveFormat.borders.style || 'solid';
     
-    if (format.borders.top) styles.borderTop = `1px ${borderStyle} ${borderColor}`;
-    if (format.borders.right) styles.borderRight = `1px ${borderStyle} ${borderColor}`;
-    if (format.borders.bottom) styles.borderBottom = `1px ${borderStyle} ${borderColor}`;
-    if (format.borders.left) styles.borderLeft = `1px ${borderStyle} ${borderColor}`;
+    if (effectiveFormat.borders.top) styles.borderTop = `1px ${borderStyle} ${borderColor}`;
+    if (effectiveFormat.borders.right) styles.borderRight = `1px ${borderStyle} ${borderColor}`;
+    if (effectiveFormat.borders.bottom) styles.borderBottom = `1px ${borderStyle} ${borderColor}`;
+    if (effectiveFormat.borders.left) styles.borderLeft = `1px ${borderStyle} ${borderColor}`;
   }
   
   return styles;
