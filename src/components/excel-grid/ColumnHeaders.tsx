@@ -45,7 +45,7 @@ export const ColumnHeaders = forwardRef<HTMLDivElement, ColumnHeadersProps>(({ s
                 : 'bg-gray-100 hover:bg-gray-200 text-gray-600 border-b border-b-gray-300'
             }`}
             style={{
-              backgroundColor: isColSelected(colIndex) ? '#e8f2ec' : undefined
+              backgroundColor: isColSelected(colIndex) ? '#caead8' : undefined
             }}
             onClick={() => onColumnSelect(colIndex)}
           >

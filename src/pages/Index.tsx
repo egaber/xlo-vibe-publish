@@ -596,7 +596,7 @@ const Index = () => {
       </div>
       
       {/* Scrollable content area */}
-      <div ref={gridContainerRef} className="fixed top-[315px] left-0 right-0 bottom-0 overflow-hidden">
+      <div ref={gridContainerRef} className="fixed top-[303px] left-0 right-0 bottom-0 overflow-hidden"> {/* Push div */}
         <ExcelGrid
           onCellSelect={handleCellSelect}
           cellData={cellData}

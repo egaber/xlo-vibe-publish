@@ -335,7 +335,7 @@ export const ExcelGrid = ({
                   : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
               }`}
               style={{
-                backgroundColor: isRowSelected(rowIndex) ? '#e8f2ec' : undefined
+                backgroundColor: isRowSelected(rowIndex) ? '#caead8' : undefined
               }}
               onClick={() => {
                 // Select entire row
@@ -356,6 +356,11 @@ export const ExcelGrid = ({
               const isActiveCell = selection.start.row === rowIndex && selection.start.col === colIndex;
               const isEditing = editingCell?.row === rowIndex && editingCell?.col === colIndex;
               const rangeBorders = getRangeBorders(rowIndex, colIndex);
+              
+              // Check if this is the bottom-right cell of the selection
+              const maxRow = Math.max(selection.start.row, selection.end.row);
+              const maxCol = Math.max(selection.start.col, selection.end.col);
+              const isBottomRightCell = isSelected && rowIndex === maxRow && colIndex === maxCol;
               
               // Check if cell is in formula reference
               const formulaRef = isInFormulaReference(cellRef);
@@ -425,6 +430,16 @@ export const ExcelGrid = ({
                       style={cellStyles}
                     >
                       {formattedValue}
+                      {/* Fill handle - small square at bottom-right of selection */}
+                      {isBottomRightCell && (
+                        <div 
+                          className="absolute bottom-0 right-0 w-[6px] h-[6px] bg-[#127d42] border border-white cursor-crosshair z-50"
+                          style={{
+                            transform: 'translate(4px, 4px)',
+                            borderWidth: '0.5px'
+                          }}
+                        />
+                      )}
                     </div>
                   )}
                 </div>
