@@ -63,6 +63,9 @@ const Index = () => {
     end: { row: 0, col: 0 }
   });
   
+  // Column width state
+  const [columnWidths, setColumnWidths] = useState<number[]>(Array(39).fill(80));
+  
   // Colors for formula references
   const referenceColors = [
     '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', 
@@ -594,6 +597,14 @@ const Index = () => {
     setCurrentSelection(newSelection);
   };
 
+  const handleColumnWidthChange = (columnIndex: number, width: number) => {
+    setColumnWidths(prev => {
+      const newWidths = [...prev];
+      newWidths[columnIndex] = width;
+      return newWidths;
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Fixed header area - stays at top */}
@@ -613,6 +624,8 @@ const Index = () => {
           selection={currentSelection}
           onColumnSelect={handleColumnSelect}
           onSelectAll={handleSelectAll}
+          columnWidths={columnWidths}
+          onColumnWidthChange={handleColumnWidthChange}
         />
       </div>
       
@@ -631,6 +644,8 @@ const Index = () => {
           onSelectAll={handleSelectAll}
           externalSelection={currentSelection}
           onScroll={handleGridScroll}
+          columnWidths={columnWidths}
+          onColumnWidthChange={handleColumnWidthChange}
         />
       </div>
       

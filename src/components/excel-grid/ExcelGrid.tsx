@@ -22,10 +22,13 @@ interface ExcelGridProps {
   onSelectAll?: () => void;
   externalSelection?: Selection;
   onScroll?: (scrollLeft: number) => void;
+  columnWidths?: number[];
+  onColumnWidthChange?: (columnIndex: number, width: number) => void;
 }
 
 const GRID_ROWS = 100;
 const GRID_COLS = 39; // Extended to AM (A=1, B=2, ..., Z=26, AA=27, AB=28, ..., AM=39)
+const DEFAULT_COLUMN_WIDTH = 80; // Default column width in pixels
 
 const getColumnName = (index: number): string => {
   let result = '';
@@ -68,7 +71,8 @@ const shouldSpillOver = (
   fontFamily: string,
   rowIndex: number,
   colIndex: number,
-  cellData: Record<string, CellData>
+  cellData: Record<string, CellData>,
+  columnWidths: number[]
 ): { shouldSpill: boolean; spillCells: number } => {
   if (!text || text.trim() === '') return { shouldSpill: false, spillCells: 0 };
   
@@ -95,7 +99,7 @@ const shouldSpillOver = (
     }
     
     spillCells++;
-    totalWidth += cellWidth;
+    totalWidth += (columnWidths[i] || DEFAULT_COLUMN_WIDTH);
   }
   
   return { shouldSpill: spillCells > 0, spillCells };
@@ -113,7 +117,9 @@ export const ExcelGrid = ({
   onColumnSelect,
   onSelectAll,
   externalSelection,
-  onScroll
+  onScroll,
+  columnWidths = Array(GRID_COLS).fill(DEFAULT_COLUMN_WIDTH),
+  onColumnWidthChange
 }: ExcelGridProps) => {
   const [selection, setSelection] = useState<Selection>({
     start: { row: 0, col: 0 },
@@ -206,7 +212,7 @@ export const ExcelGrid = ({
     const isLeftEdge = col === minCol;
     const isRightEdge = col === maxCol;
     
-    let borderClasses = '';
+let borderClasses = 'dancing-ants';
     
     if (isTopEdge) borderClasses += ' border-t-2 border-t-[#127d42]';
     if (isBottomEdge) borderClasses += ' border-b-2 border-b-[#127d42]';
@@ -450,14 +456,16 @@ export const ExcelGrid = ({
               // Check for spillover
               const fontSize = (cellStyles.fontSize as number) || 14;
               const fontFamily = (cellStyles.fontFamily as string) || '"Aptos Narrow (Body)", "Segoe UI", system-ui, sans-serif';
+              const currentCellWidth = columnWidths[colIndex] || DEFAULT_COLUMN_WIDTH;
               const { shouldSpill, spillCells } = shouldSpillOver(
                 formattedValue, 
-                80, // cell width (w-20 = 80px)
+                currentCellWidth,
                 fontSize,
                 fontFamily,
                 rowIndex,
                 colIndex,
-                cellData
+                cellData,
+                columnWidths
               );
               
               // Check if this cell is being spilled into by a cell to the left
@@ -471,15 +479,17 @@ export const ExcelGrid = ({
                   const leftFontSize = (leftCellStyles.fontSize as number) || 14;
                   const leftFontFamily = (leftCellStyles.fontFamily as string) || '"Aptos Narrow (Body)", "Segoe UI", system-ui, sans-serif';
                   const leftFormattedValue = formatCellValue(leftCellInfo.value, leftCellInfo.format);
+                  const leftCellWidth = columnWidths[i] || DEFAULT_COLUMN_WIDTH;
                   
                   const { shouldSpill: leftShouldSpill, spillCells: leftSpillCells } = shouldSpillOver(
                     leftFormattedValue,
-                    80,
+                    leftCellWidth,
                     leftFontSize,
                     leftFontFamily,
                     rowIndex,
                     i,
-                    cellData
+                    cellData,
+                    columnWidths
                   );
                   
                   if (leftShouldSpill && (i + leftSpillCells) >= colIndex) {
@@ -530,11 +540,18 @@ export const ExcelGrid = ({
                 bgColor = 'bg-blue-100';
               }
 
+              const renderCellWidth = columnWidths[colIndex] || DEFAULT_COLUMN_WIDTH;
+              
               return (
                 <div
                   key={colIndex}
-                  className={`w-20 h-6 border-r border-b border-gray-300 relative cursor-cell select-none ${bgColor} ${rangeBorders}`}
-                  style={cellStyle}
+                  className={`h-6 border-r border-b border-gray-300 relative cursor-cell select-none ${bgColor} ${rangeBorders}`}
+                  style={{ 
+                    ...cellStyle,
+                    width: `${renderCellWidth}px`,
+                    minWidth: `${renderCellWidth}px`,
+                    flexShrink: 0
+                  }}
                   onMouseDown={() => handleMouseDown(rowIndex, colIndex)}
                   onMouseOver={() => handleMouseOver(rowIndex, colIndex)}
                   onDoubleClick={() => handleCellDoubleClick(rowIndex, colIndex)}
@@ -592,7 +609,13 @@ export const ExcelGrid = ({
                             left: shouldSpill ? '4px' : 'auto',
                             top: shouldSpill ? '50%' : 'auto',
                             transform: shouldSpill ? 'translateY(-50%)' : 'none',
-                            width: shouldSpill ? `${80 + (spillCells * 80) - 8}px` : 'auto',
+                            width: shouldSpill ? (() => {
+                              let spillWidth = currentCellWidth - 8;
+                              for (let i = 1; i <= spillCells; i++) {
+                                spillWidth += (columnWidths[colIndex + i] || DEFAULT_COLUMN_WIDTH);
+                              }
+                              return `${spillWidth}px`;
+                            })() : 'auto',
                             zIndex: shouldSpill ? 10 : 1,
                             backgroundColor: 'transparent'
                           }}

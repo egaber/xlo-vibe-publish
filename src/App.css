@@ -40,3 +40,18 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Dancing Ants Animation */
+@keyframes dancing-ants {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 100% 0;
+  }
+}
+
+.dancing-ants {
+  border: 2px dashed black;
+  animation: dancing-ants 0.5s linear infinite;
+}
