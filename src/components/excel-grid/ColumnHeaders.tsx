@@ -4,6 +4,7 @@ import { forwardRef } from "react";
 interface ColumnHeadersProps {
   selection?: Selection;
   onColumnSelect: (colIndex: number) => void;
+  onSelectAll?: () => void;
 }
 
 const GRID_COLS = 39;
@@ -18,7 +19,7 @@ const getColumnName = (index: number): string => {
   return result;
 };
 
-export const ColumnHeaders = forwardRef<HTMLDivElement, ColumnHeadersProps>(({ selection, onColumnSelect }, ref) => {
+export const ColumnHeaders = forwardRef<HTMLDivElement, ColumnHeadersProps>(({ selection, onColumnSelect, onSelectAll }, ref) => {
   const isColSelected = (colIndex: number): boolean => {
     if (!selection) return false;
     const { start, end } = selection;
@@ -29,10 +30,36 @@ export const ColumnHeaders = forwardRef<HTMLDivElement, ColumnHeadersProps>(({ s
     return colIndex >= minCol && colIndex <= maxCol;
   };
 
+  // Check if all cells are selected
+  const isAllSelected = (): boolean => {
+    if (!selection) return false;
+    const { start, end } = selection;
+    return start.row === 0 && start.col === 0 && 
+           end.row === GRID_ROWS - 1 && end.col === GRID_COLS - 1;
+  };
+
   return (
     <div ref={ref} className="flex bg-white border-b border-gray-300 overflow-x-auto scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-      {/* Top-left corner */}
-      <div className="w-12 h-6 bg-gray-100 border-r border-gray-300 flex items-center justify-center text-xs font-medium flex-shrink-0 sticky left-0 z-10"></div>
+      {/* Top-left corner - Select All Triangle */}
+      <div 
+        className={`w-12 h-6 border-r border-gray-300 flex items-center justify-center text-xs font-medium flex-shrink-0 sticky left-0 z-10 cursor-pointer select-none ${
+          isAllSelected() 
+            ? 'bg-[#caead8] text-[#127d42]' 
+            : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
+        }`}
+        onClick={onSelectAll}
+        title="Select All"
+      >
+        <svg 
+          width="8" 
+          height="8" 
+          viewBox="0 0 8 8" 
+          fill="currentColor"
+          className="rotate-45"
+        >
+          <polygon points="0,0 8,0 0,8" />
+        </svg>
+      </div>
       
       {/* Column Headers Container */}
       <div className="flex" style={{ minWidth: 'max-content' }}>

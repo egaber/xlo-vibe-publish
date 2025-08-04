@@ -84,6 +84,7 @@ export const ExcelRibbon = ({ ribbonActions }: ExcelRibbonProps) => {
   const [currentTextColor, setCurrentTextColor] = useState("#FF0000");
   const [currentBackgroundColor, setCurrentBackgroundColor] = useState("#FFFF00");
   const [testDialogOpen, setTestDialogOpen] = useState(false);
+  const [taskPaneOpen, setTaskPaneOpen] = useState(false);
   const [testInputValue, setTestInputValue] = useState("");
 
   const tabs = ["File", "Home", "Insert", "Page Layout", "Formulas", "Data", "Review", "View", "Help"];
@@ -451,10 +452,14 @@ export const ExcelRibbon = ({ ribbonActions }: ExcelRibbonProps) => {
             {/* Copilot Group */}
             <RibbonGroup title="Copilot">
               <div className="flex flex-col items-center">
-                <Button variant="ghost" size="sm" className="h-14 w-14 flex-col p-1 hover:bg-blue-50 relative">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-14 w-14 flex-col p-1 hover:bg-blue-50 relative"
+                  onClick={() => setTaskPaneOpen(true)}
+                >
                   <LargeCopilotIcon className="w-8 h-8 mb-1" />
                   <span className="text-xs">Copilot</span>
-                  <ChevronDownIcon className="w-3 h-3 absolute bottom-0 right-1" />
                 </Button>
               </div>
             </RibbonGroup>
@@ -580,6 +585,20 @@ export const ExcelRibbon = ({ ribbonActions }: ExcelRibbonProps) => {
             <CopilotDropdownMobile />
           </div>
         </>
+      )}
+      {taskPaneOpen && (
+        <div className="fixed top-0 right-0 w-80 h-full bg-white shadow-lg border-l border-gray-200">
+          <div className="p-4">
+            <h2 className="text-lg font-semibold text-gray-800">Copilot</h2>
+            <p className="text-sm text-gray-600">This is the task pane content.</p>
+          </div>
+          <button 
+            className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+            onClick={() => setTaskPaneOpen(false)}
+          >
+            ✕
+          </button>
+        </div>
       )}
     </div>
   );

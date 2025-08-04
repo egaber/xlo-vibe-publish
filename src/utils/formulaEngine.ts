@@ -1,4 +1,17 @@
 // Formula engine for Excel-like calculations
+
+// Extend Window interface for GPT requests tracking
+declare global {
+  interface Window {
+    gptRequests?: Map<string, {
+      prompt: string;
+      status: 'pending' | 'completed' | 'error';
+      result?: string;
+      timestamp: number;
+    }>;
+  }
+}
+
 export interface CellData {
   value: string;
   formula?: string;
@@ -248,6 +261,116 @@ export const FUNCTIONS: Record<string, (args: FunctionArg[], context: FormulaCon
     }
     
     return conditionResult ? trueValue : falseValue;
+  },
+
+  GPT: (args: FunctionArg[], context: FormulaContext) => {
+    if (args.length === 0) return '#ERROR!';
+    
+    // Get the prompt from the first argument
+    let prompt = String(args[0]);
+    
+    // If it's a cell reference, get the cell value
+    if (typeof args[0] === 'string' && parseCellRef(args[0])) {
+      prompt = context.getCellValue(args[0]);
+    }
+    
+    // Remove quotes if present
+    if (prompt.startsWith('"') && prompt.endsWith('"')) {
+      prompt = prompt.slice(1, -1);
+    }
+    
+    if (!prompt || prompt.trim() === '') {
+      return '#ERROR!';
+    }
+    
+    // Create a unique identifier for this request
+    const requestId = `gpt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    // Store the request for tracking
+    if (!window.gptRequests) {
+      window.gptRequests = new Map();
+    }
+    
+    // Check if we already have a pending request for this exact prompt
+    const existingRequest = Array.from(window.gptRequests.entries()).find(
+      ([id, data]) => data.prompt === prompt && data.status === 'pending'
+    );
+    
+    if (existingRequest) {
+      return `Loading... (${existingRequest[0]})`;
+    }
+    
+    // Store this request
+    window.gptRequests.set(requestId, {
+      prompt,
+      status: 'pending',
+      timestamp: Date.now()
+    });
+    
+    // Make async call to VS LM API
+    setTimeout(async () => {
+      try {
+        console.log('Calling VS LM API with prompt:', prompt);
+        
+        const response = await fetch('http://localhost:3000/api/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            messages: [
+              {
+                role: 'user',
+                content: prompt
+              }
+            ]
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        const result = data.response || data.choices?.[0]?.message?.content || data.content || 'No response';
+        
+        // Update the request status
+        if (window.gptRequests.has(requestId)) {
+          window.gptRequests.set(requestId, {
+            prompt,
+            status: 'completed',
+            result,
+            timestamp: Date.now()
+          });
+        }
+        
+        console.log('GPT Response received:', result);
+        
+        // Dispatch event with the response
+        window.dispatchEvent(new CustomEvent('gpt-response', { 
+          detail: { requestId, result, prompt } 
+        }));
+        
+      } catch (error) {
+        console.error('Error calling VS LM API:', error);
+        
+        // Update the request status
+        if (window.gptRequests.has(requestId)) {
+          window.gptRequests.set(requestId, {
+            prompt,
+            status: 'error',
+            result: '#API_ERROR!',
+            timestamp: Date.now()
+          });
+        }
+        
+        window.dispatchEvent(new CustomEvent('gpt-response', { 
+          detail: { requestId, result: '#API_ERROR!', prompt } 
+        }));
+      }
+    }, 100); // Small delay to ensure UI updates
+    
+    return `Loading... (${requestId})`;
   }
 };
 

@@ -583,6 +583,17 @@ const Index = () => {
     setCurrentSelection(newSelection);
   };
 
+  // Handle select all
+  const handleSelectAll = () => {
+    const GRID_ROWS = 100; // Should match the constant in ExcelGrid
+    const GRID_COLS = 39; // Should match the constant in ExcelGrid
+    const newSelection: Selection = {
+      start: { row: 0, col: 0 },
+      end: { row: GRID_ROWS - 1, col: GRID_COLS - 1 }
+    };
+    setCurrentSelection(newSelection);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Fixed header area - stays at top */}
@@ -601,6 +612,7 @@ const Index = () => {
           ref={columnHeadersRef}
           selection={currentSelection}
           onColumnSelect={handleColumnSelect}
+          onSelectAll={handleSelectAll}
         />
       </div>
       
@@ -616,6 +628,7 @@ const Index = () => {
           onCellClickInFormulaMode={handleCellClickInFormulaMode}
           onSelectionChange={handleSelectionChange}
           onColumnSelect={handleColumnSelect}
+          onSelectAll={handleSelectAll}
           externalSelection={currentSelection}
           onScroll={handleGridScroll}
         />

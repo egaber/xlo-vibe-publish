@@ -19,6 +19,7 @@ interface ExcelGridProps {
   onCellClickInFormulaMode?: (cellRef: string, isRangeSelection?: boolean) => void;
   onSelectionChange?: (selection: Selection) => void;
   onColumnSelect?: (colIndex: number) => void;
+  onSelectAll?: () => void;
   externalSelection?: Selection;
   onScroll?: (scrollLeft: number) => void;
 }
@@ -110,6 +111,7 @@ export const ExcelGrid = ({
   onCellClickInFormulaMode,
   onSelectionChange,
   onColumnSelect,
+  onSelectAll,
   externalSelection,
   onScroll
 }: ExcelGridProps) => {
@@ -366,6 +368,29 @@ export const ExcelGrid = ({
     document.addEventListener('mouseup', handleMouseUp);
     return () => document.removeEventListener('mouseup', handleMouseUp);
   }, []);
+
+  // Handle GPT responses
+  useEffect(() => {
+    const handleGptResponse = (event: CustomEvent) => {
+      const { requestId, result, prompt } = event.detail;
+      
+      // Find cells with GPT formulas that match this requestId or prompt
+      Object.entries(cellData).forEach(([cellRef, data]) => {
+        if (data.formula && data.formula.includes('GPT(') && data.value && 
+            (data.value.includes(requestId) || 
+             (data.formula.includes('"' + prompt + '"') || data.formula.includes("'" + prompt + "'")))) {
+          // Update the cell with the GPT response
+          onCellUpdate(cellRef, {
+            value: result,
+            formula: data.formula
+          });
+        }
+      });
+    };
+
+    window.addEventListener('gpt-response', handleGptResponse as EventListener);
+    return () => window.removeEventListener('gpt-response', handleGptResponse as EventListener);
+  }, [cellData, onCellUpdate]);
 
   return (
     <div 
