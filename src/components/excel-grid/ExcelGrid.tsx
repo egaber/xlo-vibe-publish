@@ -48,6 +48,58 @@ const parseSelection = (selection: Selection): string => {
   return `${startRef}:${endRef}`;
 };
 
+// Helper function to calculate text width
+const getTextWidth = (text: string, font: string): number => {
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+  if (context) {
+    context.font = font;
+    return context.measureText(text).width;
+  }
+  return 0;
+};
+
+// Helper function to check if a cell should spill over
+const shouldSpillOver = (
+  text: string, 
+  cellWidth: number, 
+  fontSize: number, 
+  fontFamily: string,
+  rowIndex: number,
+  colIndex: number,
+  cellData: Record<string, CellData>
+): { shouldSpill: boolean; spillCells: number } => {
+  if (!text || text.trim() === '') return { shouldSpill: false, spillCells: 0 };
+  
+  const font = `${fontSize}px ${fontFamily}`;
+  const textWidth = getTextWidth(text, font);
+  const availableWidth = cellWidth - 8; // Account for padding
+  
+  if (textWidth <= availableWidth) {
+    return { shouldSpill: false, spillCells: 0 };
+  }
+  
+  // Calculate how many cells we need to spill into
+  let spillCells = 0;
+  let totalWidth = availableWidth;
+  
+  // Check adjacent cells to the right
+  for (let i = colIndex + 1; i < GRID_COLS && totalWidth < textWidth; i++) {
+    const adjacentCellRef = getCellRef(rowIndex, i);
+    const adjacentCellInfo = cellData[adjacentCellRef];
+    
+    // Stop if adjacent cell has content
+    if (adjacentCellInfo && adjacentCellInfo.value && adjacentCellInfo.value.trim() !== '') {
+      break;
+    }
+    
+    spillCells++;
+    totalWidth += cellWidth;
+  }
+  
+  return { shouldSpill: spillCells > 0, spillCells };
+};
+
 export const ExcelGrid = ({ 
   onCellSelect, 
   cellData, 
@@ -370,9 +422,66 @@ export const ExcelGrid = ({
               const cellStyles = getCellStyles(cellInfo.format);
               const formattedValue = formatCellValue(cellInfo.value, cellInfo.format);
               
+              // Check for spillover
+              const fontSize = (cellStyles.fontSize as number) || 14;
+              const fontFamily = (cellStyles.fontFamily as string) || '"Aptos Narrow (Body)", "Segoe UI", system-ui, sans-serif';
+              const { shouldSpill, spillCells } = shouldSpillOver(
+                formattedValue, 
+                80, // cell width (w-20 = 80px)
+                fontSize,
+                fontFamily,
+                rowIndex,
+                colIndex,
+                cellData
+              );
+              
+              // Check if this cell is being spilled into by a cell to the left
+              let isSpilledInto = false;
+              let spillSourceCol = -1;
+              for (let i = colIndex - 1; i >= 0; i--) {
+                const leftCellRef = getCellRef(rowIndex, i);
+                const leftCellInfo = cellData[leftCellRef] || { value: "" };
+                if (leftCellInfo.value && leftCellInfo.value.trim() !== '') {
+                  const leftCellStyles = getCellStyles(leftCellInfo.format);
+                  const leftFontSize = (leftCellStyles.fontSize as number) || 14;
+                  const leftFontFamily = (leftCellStyles.fontFamily as string) || '"Aptos Narrow (Body)", "Segoe UI", system-ui, sans-serif';
+                  const leftFormattedValue = formatCellValue(leftCellInfo.value, leftCellInfo.format);
+                  
+                  const { shouldSpill: leftShouldSpill, spillCells: leftSpillCells } = shouldSpillOver(
+                    leftFormattedValue,
+                    80,
+                    leftFontSize,
+                    leftFontFamily,
+                    rowIndex,
+                    i,
+                    cellData
+                  );
+                  
+                  if (leftShouldSpill && (i + leftSpillCells) >= colIndex) {
+                    isSpilledInto = true;
+                    spillSourceCol = i;
+                    break;
+                  }
+                }
+                // If we hit a cell with content, stop looking
+                if (leftCellInfo.value && leftCellInfo.value.trim() !== '') {
+                  break;
+                }
+              }
+              
               // Determine background color and styles
               let bgColor = 'bg-white hover:bg-gray-50';
               let cellStyle: React.CSSProperties = { ...cellStyles };
+              
+              // If this cell is being spilled into, remove its background
+              if (isSpilledInto && !isSelected) {
+                bgColor = 'bg-transparent hover:bg-gray-50';
+                // Remove background color from spilled content
+                cellStyle = {
+                  ...cellStyle,
+                  backgroundColor: 'transparent'
+                };
+              }
               
               if (isSelected && isActiveCell) {
                 // Only the active cell (top-left of selection) is transparent
@@ -436,7 +545,7 @@ export const ExcelGrid = ({
                     />
                   ) : (
                     <div 
-                      className="w-full h-full px-1 flex items-center overflow-hidden select-none"
+                      className="w-full h-full px-1 flex items-center overflow-hidden select-none relative"
                       style={{
                         ...cellStyles,
                         fontSize: cellStyles.fontSize || '14px',
@@ -447,7 +556,30 @@ export const ExcelGrid = ({
                         lineHeight: '1.2'
                       }}
                     >
-                      {formattedValue}
+                      {/* Normal cell content */}
+                      {formattedValue && !isSpilledInto && (
+                        <span 
+                          style={{
+                            display: 'block',
+                            whiteSpace: 'nowrap',
+                            overflow: shouldSpill ? 'visible' : 'hidden',
+                            position: shouldSpill ? 'absolute' : 'static',
+                            left: shouldSpill ? '4px' : 'auto',
+                            top: shouldSpill ? '50%' : 'auto',
+                            transform: shouldSpill ? 'translateY(-50%)' : 'none',
+                            width: shouldSpill ? `${80 + (spillCells * 80) - 8}px` : 'auto',
+                            zIndex: shouldSpill ? 10 : 1,
+                            backgroundColor: 'transparent'
+                          }}
+                        >
+                          {formattedValue}
+                        </span>
+                      )}
+                      
+                      {/* Show content if this cell has its own content and is spilled into */}
+                      {isSpilledInto && cellInfo.value && (
+                        <span>{formattedValue}</span>
+                      )}
                       {/* Fill handle - small square at bottom-right of selection */}
                       {isBottomRightCell && (
                         <div 

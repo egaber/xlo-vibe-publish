@@ -433,7 +433,7 @@ const Index = () => {
       
       cellRefs.forEach(ref => {
         const currentCell = newCellData[ref];
-        const currentSize = currentCell?.format?.fontSize || 11;
+        const currentSize = currentCell?.format?.fontSize || 14;
         newCellData[ref] = applyCellFormat(currentCell, { fontSize: currentSize + 1 });
       });
       
@@ -446,7 +446,7 @@ const Index = () => {
       
       cellRefs.forEach(ref => {
         const currentCell = newCellData[ref];
-        const currentSize = currentCell?.format?.fontSize || 11;
+        const currentSize = currentCell?.format?.fontSize || 14;
         newCellData[ref] = applyCellFormat(currentCell, { fontSize: Math.max(8, currentSize - 1) });
       });
       
