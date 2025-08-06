@@ -50,7 +50,7 @@ export const ColorPicker = ({ selectedColor, onColorChange, onButtonClick, defau
           onClick={handleButtonClick}
         >
           {type === "background" ? 
-            <FillColorIcon className="w-4 h-4 relative -top-1" /> : 
+            <FillColorIcon className="w-4 h-4 relative -top-0" /> : 
             <span className="text-sm font-bold text-gray-700 relative -top-1">A</span>
           }
           {/* Color rectangle positioned higher and more to the left */}

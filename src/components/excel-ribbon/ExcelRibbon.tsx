@@ -212,7 +212,7 @@ export const ExcelRibbon = ({ ribbonActions }: ExcelRibbonProps) => {
             <RibbonGroup title="Font" className="group">
               {/* 2-line layout for wide screens */}
               <div className="hidden xl:block" style={{ width: '286.8px' }}>
-                <div className="flex flex-col gap-0.5 h-[100px] justify-center py-2">
+                <div className="flex flex-col gap-0.5 h-[120px] justify-center py-2">
                   {/* Row 1: Font name, size, and font size controls */}
                   <div className="flex items-center gap-1">
                     <select 
@@ -300,7 +300,7 @@ export const ExcelRibbon = ({ ribbonActions }: ExcelRibbonProps) => {
               
               {/* 3-line layout for medium screens */}
               <div className="block xl:hidden" style={{ width: '193.2px' }}>
-                <div className="flex flex-col gap-0.5 h-[100px] justify-center py-2">
+                <div className="flex flex-col gap-0.5 h-[140px] justify-center py-2">
                   {/* Row 1: Font name, size, and font size controls */}
                   <div className="flex items-center gap-1">
                     <select 
@@ -772,7 +772,7 @@ export const ExcelRibbon = ({ ribbonActions }: ExcelRibbonProps) => {
                 </div>
                 <div className="flex flex-col gap-0.5">
                   <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
-                    <CutIcon className="w-4 h-4" />
+                    <CutIcon className="w-5 h-5" />
                   </Button>
                   <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-blue-50">
                     <CopyIcon className="w-4 h-4" />

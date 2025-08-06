@@ -38,7 +38,7 @@ export const PasteDropdown = ({
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col relative">
       {/* Main Paste Button */}
       <Button 
         variant="ghost" 
@@ -58,12 +58,12 @@ export const PasteDropdown = ({
           <Button 
             variant="ghost" 
             size="sm" 
-            className="h-2 w-14 p-0 hover:bg-blue-50 flex items-center justify-center"
+            className="h-2 w-14 p-0 hover:bg-blue-50 flex items-center justify-center mt-2"
           >
             <ChevronDownIcon className="w-3 h-3" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[280px] p-2 bg-white border border-gray-200 shadow-lg" align="start">
+        <PopoverContent className="w-[280px] p-2 bg-white border border-gray-200 shadow-lg mt-4" side="bottom" align="start" sideOffset={8}>
           <div className="space-y-1">
             {/* Regular Paste Options */}
             <button 
