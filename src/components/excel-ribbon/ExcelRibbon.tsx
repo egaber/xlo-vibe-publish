@@ -169,7 +169,7 @@ export const ExcelRibbon = ({ ribbonActions }: ExcelRibbonProps) => {
           <div className="hidden lg:flex bg-white rounded-[10px] shadow-md mx-2 mb-2 px-2 py-2 h-[120px]">
             {/* Undo/Redo Group */}
             <RibbonGroup title="Undo">
-<div className="flex flex-col gap-1">
+<div className="flex flex-col gap-4">
                 <Button variant="ribbon" size="ribbon-mini" onClick={ribbonActions.undo}>
 <UndoIcon />
                 </Button>
