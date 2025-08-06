@@ -1,0 +1,10 @@
+<?xml version="1.0" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0,0,2048,2048">
+  <path class='OfficeIconColors_HighContrast' d='M128 128h512v1792h-512v-1792z m64 64v576h384v-576h-384z m0 640v1024h384v-1024h-384z m576-704h512v1792h-512v-1792z m64 64v194h384v-194h-384z m384 258h-384v1406h384v-1406z m192 1470v-1792h512v1792h-512z m448-1728h-384v960h384v-960z m0 1024h-384v640h384v-640z'/>
+  <path class='OfficeIconColors_m26' d='M160 800h448v1088h-448v-1088z'/>
+  <path class='OfficeIconColors_m2122' d='M800 544q0-53 37-91 37-37 91-37h192q53 0 91 37 37 37 37 91v1344h-448l0-1344z'/>
+  <path class='OfficeIconColors_m26' d='M1440 1184h448v704h-448v-704z'/>
+  <path class='OfficeIconColors_m25' d='M128 128h512v1792h-512v-1792z m64 64v576h384v-576h-384z m0 640v1024h384v-1024h-384z'/>
+  <path class='OfficeIconColors_m25' d='M768 128h512v1792h-512v-1792z m64 64v194h384v-194h-384z m384 258h-384v1406h384v-1406z'/>
+  <path class='OfficeIconColors_m25' d='M1408 128v1792h512v-1792h-512z m64 64h384v960h-384v-960z m0 1024h384v640h-384v-640z'/>
+</svg>

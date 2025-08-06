@@ -1,0 +1,8 @@
+<?xml version="1.0" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0,0,2048,2048">
+  <path class='OfficeIconColors_HighContrast' d='M 896 128 h -384 v -128 h 384 m -512 0 v 128 h -256 v 256 h -128 v -384 m 0 896 v -384 h 128 v 384 m 1152 0 v -384 h 128 v 384 m -384 -896 h 384 v 384 h -128 v -256 h -256 m -512 1152 h 384 v 128 h -384 m 768 -384 h 128 v 384 h -384 v -128 h 256 m -1152 0 h 256 v 128 h -384 v -384 h 128 m 1408 -707 l 384 221 v 969 l -836 483 l -787 -454 h 262 l 465 268 v -268 h 128 v 268 l 640 -369 v -748 l -256 148 v -148 l 192 -111 l -192 -111 m -1152 687 h -128 v -613 l 490 -283 h 256 l -554 320 l 320 185 v 147 l -384 -221 z'/>
+  <path class='OfficeIconColors_m20' d='M 1536 391 l 320 184 v 895 l -772 446 l -659 -380 h 1111 m -384 -384 h -832 v -576 l 554 -320 h 278 z'/>
+  <path class='OfficeIconColors_m23' d='M 1536 317 l 384 221 v 969 l -836 483 l -787 -454 h 262 l 465 268 v -268 h 128 v 268 l 640 -369 v -748 l -256 148 v -148 l 192 -111 l -192 -111 z'/>
+  <path class='OfficeIconColors_m295' d='M 384 1152 h -128 v -613 l 490 -283 h 256 l -554 320 l 320 185 v 147 l -384 -221 z'/>
+  <path class='OfficeIconColors_m22' d='M 896 128 h -384 v -128 h 384 m -512 0 v 128 h -256 v 256 h -128 v -384 m 0 896 v -384 h 128 v 384 m 1152 0 v -384 h 128 v 384 m -384 -896 h 384 v 384 h -128 v -256 h -256 m -512 1152 h 384 v 128 h -384 m 768 -384 h 128 v 384 h -384 v -128 h 256 m -1152 0 h 256 v 128 h -384 v -384 h 128 z'/>
+</svg>

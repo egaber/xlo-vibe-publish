@@ -1,0 +1,9 @@
+<?xml version="1.0" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0,0,2048,2048">
+  <path class='OfficeIconColors_HighContrast' d='M 128 128 h 1664 v 1664 h -1664 m 1536 -128 v -1408 h -128 v 128 h -1152 v 1152 h -128 v 128 z'/>
+  <path class='OfficeIconColors_m21' d='M 1728 192 v 1536 h -1536 v -1536 z'/>
+  <path class='OfficeIconColors_m222' d='M 1728 192 v 1536 h -1536 v -1536 z'/>
+  <path class='OfficeIconColors_m22' d='M 128 128 h 1664 v 1664 h -1664 m 1536 -128 v -1408 h -1408 v 1408 z'/>
+  <path class='OfficeIconColors_m227' d='M 1536 384 h 128 v 1280 h -1280 v -128 h 1152 z'/>
+  <path class='OfficeIconColors_m249' d='M 384 1536 h -128 v -1280 h 1280 v 128 h -1152 z'/>
+</svg>

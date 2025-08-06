@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import ExcelTopBar from "@/components/excel-ribbon/ExcelTopBar";
 import { ExcelRibbon } from "@/components/excel-ribbon/ExcelRibbon";
 import { FormulaBar } from "@/components/excel-grid/FormulaBar";
@@ -16,6 +16,7 @@ import {
   getCellRef,
   DEFAULT_CELL_FORMAT 
 } from "@/utils/cellFormatting";
+import { convertSvgImages } from "@/utils/svgIconUtils";
 
 interface SheetData {
   cellData: Record<string, CellData>;
@@ -77,6 +78,16 @@ const Index = () => {
   const selectedCell = currentSheetData.selectedCell;
   const selectedCellValue = currentSheetData.selectedCellValue;
   const cellData = currentSheetData.cellData;
+
+  // Convert SVG images to inline SVGs for colorization support
+  useEffect(() => {
+    // Convert SVGs after initial render and when ribbon updates
+    const timer = setTimeout(() => {
+      convertSvgImages();
+    }, 100); // Small delay to ensure DOM is ready
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Helper function to update current sheet data
   const updateCurrentSheetData = (updates: Partial<SheetData>) => {

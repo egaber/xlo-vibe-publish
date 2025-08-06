@@ -40,19 +40,24 @@ export const ColorPicker = ({ selectedColor, onColorChange, onButtonClick, defau
   };
 
   return (
-    <div className="flex flex-col items-start">
+    <div className="flex flex-col items-start relative">
       <div className="flex items-center">
         {/* Main button - applies current color */}
         <Button 
           variant="ghost" 
           size="sm" 
-          className="h-6 w-10 p-0 hover:bg-blue-50 flex items-center justify-center"
+          className="h-6 w-8 p-0 hover:bg-blue-50 flex items-center justify-center relative"
           onClick={handleButtonClick}
         >
           {type === "background" ? 
-            <FillColorIcon className="w-5 h-5" /> : 
-            <span className="text-sm font-bold text-gray-700">A</span>
+            <FillColorIcon className="w-4 h-4 relative -top-1" /> : 
+            <span className="text-sm font-bold text-gray-700 relative -top-1">A</span>
           }
+          {/* Color rectangle positioned higher and more to the left */}
+          <div 
+            className="absolute bottom-0.5 left-1/2 transform -translate-x-1.5 w-4 h-2 border border-gray-300"
+            style={{ backgroundColor: currentColor === "automatic" ? "transparent" : currentColor }}
+          />
         </Button>
         
         {/* Dropdown chevron - opens color palette */}
@@ -61,9 +66,9 @@ export const ColorPicker = ({ selectedColor, onColorChange, onButtonClick, defau
             <Button 
               variant="ghost" 
               size="sm" 
-              className="h-6 w-4 p-0 hover:bg-blue-50 flex items-center justify-center"
+              className="h-6 w-3 p-0 hover:bg-blue-50 flex items-center justify-center"
             >
-              <ChevronDownIcon className="w-3 h-3" />
+              <ChevronDownIcon className="w-2 h-2" />
             </Button>
           </PopoverTrigger>
         <PopoverContent className="w-[240px] p-3 bg-white border border-gray-200 shadow-lg" align="start">
@@ -137,12 +142,6 @@ export const ColorPicker = ({ selectedColor, onColorChange, onButtonClick, defau
         </PopoverContent>
         </Popover>
       </div>
-      
-      {/* Color indicator rectangle */}
-      <div 
-        className="w-5 h-2 mt-0 ml-1 border border-gray-300"
-        style={{ backgroundColor: currentColor === "automatic" ? (type === "background" ? "#FFFF00" : "#FF0000") : currentColor }}
-      />
     </div>
   );
 };

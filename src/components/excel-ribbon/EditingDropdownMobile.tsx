@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { SearchIcon, CalculatorIcon, ChevronDownIcon } from "./icons";
+import { SearchIcon, ChevronDownIcon, AutoSumIcon, ClearIcon, SortIcon, FilterIcon } from "./icons";
 
 export const EditingDropdownMobile = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -18,17 +18,20 @@ export const EditingDropdownMobile = () => {
       <PopoverContent className="w-[180px] p-2 bg-white border border-gray-200 shadow-lg" align="start">
         <div className="space-y-1">
           <button className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-blue-50 rounded-sm transition-colors">
-            <CalculatorIcon className="w-4 h-4" />
+            <AutoSumIcon className="w-4 h-4" />
             <span>AutoSum</span>
             <span className="ml-auto">▶</span>
           </button>
           <button className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-blue-50 rounded-sm transition-colors">
-            <span className="w-4 h-4 flex items-center justify-center">🗑️</span>
+            <ClearIcon className="w-4 h-4" />
             <span>Clear</span>
             <span className="ml-auto">▶</span>
           </button>
           <button className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-blue-50 rounded-sm transition-colors">
-            <span className="w-4 h-4 flex items-center justify-center">🔽</span>
+            <div className="flex items-center w-4 h-4">
+              <SortIcon className="w-3 h-3 mr-0.5" />
+              <FilterIcon className="w-3 h-3" />
+            </div>
             <span>Sort & Filter</span>
             <span className="ml-auto">▶</span>
           </button>
