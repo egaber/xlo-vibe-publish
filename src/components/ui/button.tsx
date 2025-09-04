@@ -30,7 +30,8 @@ const buttonVariants = cva(
         "ribbon-md": "h-8 px-2 py-1 text-xs [&_svg]:size-4 [&_img]:size-4",
         "ribbon-lg": "h-16 px-3 py-2 flex-col gap-1 text-xs [&_svg]:size-12 [&_img]:size-12",
         "ribbon-icon": "h-6 w-6 p-1 [&_svg]:size-4 [&_img]:size-4",
-        "ribbon-mini": "h-[16.4px] w-5 p-[3px] border-[0.8px] border-transparent [&_svg]:size-[12.4px] [&_img]:size-[12.4px]",
+        // Make mini buttons 22x24 with 16px icons to match Excel
+        "ribbon-mini": "h-[22px] w-[24px] p-[2px] border border-transparent [&_svg]:size-[16px] [&_img]:size-[16px]",
       },
     },
     defaultVariants: {

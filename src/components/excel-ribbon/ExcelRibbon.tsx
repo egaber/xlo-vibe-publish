@@ -87,7 +87,8 @@ import {
   AutoSumIcon,
   ClearIcon,
   SortIcon,
-  FilterIcon
+  FilterIcon,
+  AddinsIcon
 } from "./icons";
 
 interface ExcelRibbonProps {
@@ -145,21 +146,7 @@ export const ExcelRibbon = ({ ribbonActions }: ExcelRibbonProps) => {
           ))}
         </div>
         
-        {/* Right-aligned peripheral controls */}
-<div className="flex items-center justify-end gap-4 pr-4">
-          {/* Share Button */}
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="h-6 px-3 text-xs flex items-center gap-2 bg-green-700 text-white hover:bg-green-950 rounded-[4px]"
-          >
-<ShareIcon className="w-4 h-4" />
-            <span>Share</span>
-            <svg width="12" height="12" viewBox="0 0 12 12" className="ml-1">
-              <path d="M6 9L1.5 4.5L3 3L6 6L9 3L10.5 4.5L6 9Z" fill="currentColor" />
-            </svg>
-          </Button>
-        </div>
+        {/* Remove extra right-side controls to match expected UI */}
       </div>
 
       {/* Ribbon Content */}
@@ -171,10 +158,10 @@ export const ExcelRibbon = ({ ribbonActions }: ExcelRibbonProps) => {
             <RibbonGroup title="Undo">
 <div className="flex flex-col gap-4">
                 <Button variant="ribbon" size="ribbon-mini" onClick={ribbonActions.undo}>
-<UndoIcon />
+<UndoIcon className="w-5 h-5" />
                 </Button>
                 <Button variant="ribbon" size="ribbon-mini" onClick={ribbonActions.redo}>
-<RedoIcon />
+<RedoIcon className="w-5 h-5" />
                 </Button>
               </div>
             </RibbonGroup>
@@ -196,13 +183,13 @@ export const ExcelRibbon = ({ ribbonActions }: ExcelRibbonProps) => {
                 </div>
                 <div className="flex flex-col gap-0.5">
                   <Button variant="ribbon" size="ribbon-mini" onClick={ribbonActions.cut}>
-<CutIcon />
+<CutIcon className="w-5 h-5" />
                   </Button>
                   <Button variant="ribbon" size="ribbon-mini" onClick={ribbonActions.copy}>
-<CopyIcon />
+<CopyIcon className="w-5 h-5" />
                   </Button>
                   <Button variant="ribbon" size="ribbon-mini">
-<FormatPainterIcon />
+<FormatPainterIcon className="w-5 h-5" />
                   </Button>
                 </div>
               </div>
@@ -244,10 +231,10 @@ export const ExcelRibbon = ({ ribbonActions }: ExcelRibbonProps) => {
                     </select>
                     <div className="flex items-center gap-0.5 ml-1">
                       <Button variant="ribbon" size="ribbon-mini" onClick={ribbonActions.increaseFontSize}>
-                        <FontIncrementIcon />
+                        <FontIncrementIcon className="w-5 h-5" />
                       </Button>
                       <Button variant="ribbon" size="ribbon-mini" onClick={ribbonActions.decreaseFontSize}>
-                        <FontDecrementIcon />
+                        <FontDecrementIcon className="w-5 h-5" />
                       </Button>
                     </div>
                   </div>
@@ -256,25 +243,25 @@ export const ExcelRibbon = ({ ribbonActions }: ExcelRibbonProps) => {
                   <div className="flex items-center gap-1">
                     <div className="flex items-center gap-0.5">
                       <Button variant="ribbon" size="ribbon-mini" onClick={ribbonActions.toggleBold}>
-                        <BoldIcon />
+                        <BoldIcon className="w-5 h-5" />
                       </Button>
                       <Button variant="ribbon" size="ribbon-mini" onClick={ribbonActions.toggleItalic}>
-                        <ItalicIcon />
+                        <ItalicIcon className="w-5 h-5" />
                       </Button>
                       <Button variant="ribbon" size="ribbon-mini" onClick={ribbonActions.toggleUnderline}>
-                        <UnderlineIcon />
+                        <UnderlineIcon className="w-5 h-5" />
                       </Button>
                       <Button variant="ribbon" size="ribbon-mini">
-                        <DoubleUnderlineIcon />
+                        <DoubleUnderlineIcon className="w-5 h-5" />
                       </Button>
                       <Button variant="ribbon" size="ribbon-mini">
-                        <StrikeThroughIcon />
+                        <StrikeThroughIcon className="w-5 h-5" />
                       </Button>
                     </div>
                     <div className="w-px h-4 bg-gray-300 mx-1" />
                     <Button variant="ghost" size="sm" className="h-6 w-10 p-0 hover:bg-blue-50 flex items-center justify-start pl-1 relative">
-                      <BordersIcon className="w-4 h-4" />
-                      <ChevronDownIcon className="w-3 h-3 absolute bottom-1 right-1" />
+                      <BordersIcon className="w-5 h-5" />
+                      <ChevronDownIcon className="w-4 h-4 absolute bottom-1 right-1" />
                     </Button>
                     <div className="relative">
                       <ColorPicker 
@@ -331,10 +318,10 @@ export const ExcelRibbon = ({ ribbonActions }: ExcelRibbonProps) => {
                       <option value="24">24</option>
                     </select>
                     <Button variant="ribbon" size="ribbon-mini" onClick={ribbonActions.increaseFontSize}>
-                      <FontIncrementIcon />
+                      <FontIncrementIcon className="w-5 h-5" />
                     </Button>
                     <Button variant="ribbon" size="ribbon-mini" onClick={ribbonActions.decreaseFontSize}>
-                      <FontDecrementIcon />
+                      <FontDecrementIcon className="w-5 h-5" />
                     </Button>
                   </div>
                   
@@ -544,12 +531,32 @@ export const ExcelRibbon = ({ ribbonActions }: ExcelRibbonProps) => {
               </div>
             </RibbonGroup>
 
-            {/* Editing Group */}
+            {/* Cells Group - move before Editing to match expected */}
+            <RibbonGroup title="Cells">
+              <div className="flex flex-col gap-0.5">
+                <Button variant="ghost" size="sm" className="h-6 w-20 p-1 text-xs justify-start hover:bg-blue-50">
+                  <PlusIcon className="w-5 h-5 mr-1" />
+                  Insert
+                  <ChevronDownIcon className="w-3 h-3 ml-auto" />
+                </Button>
+                <Button variant="ghost" size="sm" className="h-6 w-20 p-1 text-xs justify-start hover:bg-blue-50">
+                  <MinusIcon className="w-5 h-5 mr-1" />
+                  Delete
+                  <ChevronDownIcon className="w-3 h-3 ml-auto" />
+                </Button>
+                <Button variant="ghost" size="sm" className="h-6 w-20 p-1 text-xs justify-start hover:bg-blue-50">
+                  <PaletteIcon className="w-5 h-5 mr-1" />
+                  Format
+                  <ChevronDownIcon className="w-3 h-3 ml-auto" />
+                </Button>
+              </div>
+            </RibbonGroup>
+
+            {/* Editing Group - autosum/clear left, sort&filter and find&select right */}
             <RibbonGroup title="Editing">
               <div className="flex items-center gap-2">
                 {/* Left side: Two small controls stacked vertically */}
                 <div className="flex flex-col gap-0.5">
-                  {/* Top: AutoSum with dropdown */}
                   <Button 
                     variant="ribbon" 
                     size="ribbon-mini"
@@ -560,7 +567,6 @@ export const ExcelRibbon = ({ ribbonActions }: ExcelRibbonProps) => {
                     <ChevronDownIcon className="w-2 h-2 absolute bottom-0 right-1" />
                   </Button>
                   
-                  {/* Bottom: Clear/Eraser with dropdown */}
                   <Button 
                     variant="ribbon" 
                     size="ribbon-mini"
@@ -571,10 +577,8 @@ export const ExcelRibbon = ({ ribbonActions }: ExcelRibbonProps) => {
                     <ChevronDownIcon className="w-2 h-2 absolute bottom-0 right-1" />
                   </Button>
                 </div>
-                
                 {/* Right side: Two larger buttons arranged horizontally */}
                 <div className="flex gap-1">
-                  {/* Sort & Filter button */}
                   <Button 
                     variant="ghost" 
                     size="sm" 
@@ -589,7 +593,6 @@ export const ExcelRibbon = ({ ribbonActions }: ExcelRibbonProps) => {
                     <span>Filter</span>
                   </Button>
                   
-                  {/* Find & Select button */}
                   <Button 
                     variant="ghost" 
                     size="sm" 
@@ -604,51 +607,24 @@ export const ExcelRibbon = ({ ribbonActions }: ExcelRibbonProps) => {
               </div>
             </RibbonGroup>
 
-            {/* Cells Group */}
-            <RibbonGroup title="Cells">
-              <div className="flex flex-col gap-0.5">
-                <Button variant="ghost" size="sm" className="h-6 w-20 p-1 text-xs justify-start hover:bg-blue-50">
-                  <PlusIcon className="w-5 h-5 mr-1" />
-                  Insert
-                </Button>
-                <Button variant="ghost" size="sm" className="h-6 w-20 p-1 text-xs justify-start hover:bg-blue-50">
-                  <MinusIcon className="w-5 h-5 mr-1" />
-                  Delete
-                </Button>
-                <Button variant="ghost" size="sm" className="h-6 w-20 p-1 text-xs justify-start hover:bg-blue-50">
-                  <PaletteIcon className="w-5 h-5 mr-1" />
-                  Format
-                </Button>
-              </div>
-            </RibbonGroup>
-
-            {/* Editing Group */}
-            <RibbonGroup title="Editing">
-              <div className="flex flex-col gap-0.5">
-                <Button variant="ghost" size="sm" className="h-6 w-24 p-1 text-xs justify-start hover:bg-blue-50">
-                  <CalculatorIcon className="w-3 h-3 mr-1" />
-                  AutoSum
-                  <ChevronDownIcon className="w-2 h-2 ml-auto" />
-                </Button>
-                <Button variant="ghost" size="sm" className="h-6 w-24 p-1 text-xs justify-start hover:bg-blue-50">
-                  <PaletteIcon className="w-3 h-3 mr-1" />
-                  Fill
-                  <ChevronDownIcon className="w-2 h-2 ml-auto" />
-                </Button>
-                <Button variant="ghost" size="sm" className="h-6 w-24 p-1 text-xs justify-start hover:bg-blue-50">
-                  <SearchIcon className="w-3 h-3 mr-1" />
-                  Find & Select
-                  <ChevronDownIcon className="w-2 h-2 ml-auto" />
-                </Button>
-              </div>
-            </RibbonGroup>
-
             {/* Sensitivity Group */}
             <RibbonGroup title="Sensitivity">
               <div className="flex flex-col items-center">
-                <Button variant="ghost" size="sm" className="h-14 w-14 flex-col p-1 hover:bg-blue-50">
+                <Button variant="ghost" size="sm" className="h-14 w-14 flex-col p-1 hover:bg-blue-50 relative">
 <LargeSensitivityIcon className="w-9 h-9 mb-1" />
                   <span className="text-xs">Sensitivity</span>
+                  <ChevronDownIcon className="w-3 h-3 absolute bottom-0 right-1" />
+                </Button>
+              </div>
+            </RibbonGroup>
+
+            {/* Add-ins Group */}
+            <RibbonGroup title="Add-ins">
+              <div className="flex flex-col items-center">
+                <Button variant="ghost" size="sm" className="h-14 w-14 flex-col p-1 hover:bg-blue-50 relative">
+<AddinsIcon className="w-9 h-9 mb-1" />
+                  <span className="text-xs">Add-ins</span>
+                  <ChevronDownIcon className="w-3 h-3 absolute bottom-0 right-1" />
                 </Button>
               </div>
             </RibbonGroup>
@@ -664,81 +640,12 @@ export const ExcelRibbon = ({ ribbonActions }: ExcelRibbonProps) => {
                 >
 <LargeCopilotIcon className="w-9 h-9 mb-1" />
                   <span className="text-xs">Copilot</span>
+                  <ChevronDownIcon className="w-3 h-3 absolute bottom-0 right-1" />
                 </Button>
               </div>
             </RibbonGroup>
 
-            {/* Test Group */}
-            <RibbonGroup title="Test">
-              <div className="flex flex-col items-center">
-                <Dialog open={testDialogOpen} onOpenChange={setTestDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-14 w-14 flex-col p-1 hover:bg-gray-50">
-                      <div className="text-2xl mb-1">🧪</div>
-                      <span className="text-xs">Test</span>
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px] bg-white border-0 rounded-3xl shadow-lg">
-                    <DialogHeader className="px-6 py-4">
-                      <DialogTitle className="text-[#127d42] text-lg font-medium">Find and Replace</DialogTitle>
-                      <DialogDescription className="text-gray-600 text-sm">
-                        Enter your search criteria below.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="px-6 py-2">
-                      <div className="space-y-4">
-                        <div className="flex items-center space-x-3">
-                          <Label htmlFor="find-input" className="text-gray-700 text-sm font-medium min-w-[80px]">
-                            Find what:
-                          </Label>
-                          <Input
-                            id="find-input"
-                            value={testInputValue}
-                            onChange={(e) => setTestInputValue(e.target.value)}
-                            className="flex-1 border-gray-300 rounded-xl focus:border-[#127d42] focus:ring-0 focus:outline-none selection:bg-pink-200"
-                            placeholder="Enter search text..."
-                          />
-                        </div>
-                        <div className="flex items-center space-x-3">
-                          <Label htmlFor="replace-input" className="text-gray-700 text-sm font-medium min-w-[80px]">
-                            Replace with:
-                          </Label>
-                          <Input
-                            id="replace-input"
-                            className="flex-1 border-gray-300 rounded-xl focus:border-[#127d42] focus:ring-0 focus:outline-none selection:bg-pink-200"
-                            placeholder="Enter replacement text..."
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <DialogFooter className="px-6 pb-6 pt-4 flex justify-end space-x-3">
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        onClick={handleTestCancel}
-                        className="border-gray-300 text-gray-700 hover:bg-gray-50 rounded-xl"
-                      >
-                        Cancel
-                      </Button>
-                      <Button 
-                        type="submit" 
-                        onClick={handleTestSubmit}
-                        className="bg-[#127d42] hover:bg-[#0f6937] text-white rounded-xl border-0"
-                      >
-                        Find All
-                      </Button>
-                      <Button 
-                        type="submit" 
-                        onClick={handleTestSubmit}
-                        className="bg-[#127d42] hover:bg-[#0f6937] text-white rounded-xl border-0"
-                      >
-                        Replace All
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </RibbonGroup>
+            {/* Remove duplicate Editing group and Test group for fidelity */}
           </div>
 
           {/* Mobile/Tablet Compact View */}

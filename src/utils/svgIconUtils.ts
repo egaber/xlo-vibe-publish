@@ -19,6 +19,10 @@ export function convertSvgImages() {
           svgElement.className.baseVal = img.className;
           if (img.alt) svgElement.setAttribute("title", img.alt);
           
+          // Force larger icon sizes by overriding width and height
+          svgElement.setAttribute("width", "20");
+          svgElement.setAttribute("height", "20");
+          
           // Copy any data attributes
           Array.from(img.attributes).forEach(attr => {
             if (attr.name.startsWith('data-')) {
@@ -62,6 +66,10 @@ export function convertSvgImagesInContainer(container: HTMLElement) {
         if (svgElement) {
           svgElement.className.baseVal = img.className;
           if (img.alt) svgElement.setAttribute("title", img.alt);
+          
+          // Force larger icon sizes by overriding width and height
+          svgElement.setAttribute("width", "20");
+          svgElement.setAttribute("height", "20");
           
           Array.from(img.attributes).forEach(attr => {
             if (attr.name.startsWith('data-')) {

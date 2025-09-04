@@ -119,6 +119,7 @@ export { ChevronDown as ChevronDownIcon } from "lucide-react";
 export { Share as ShareIcon } from "lucide-react";
 export { Eye as EyeIcon } from "lucide-react";
 export { FileSpreadsheet as FileSpreadsheetIcon } from "lucide-react";
+export { LayoutGrid as AddinsIcon } from "lucide-react";
 
 // Large icons for desktop mode
 export const LargeSensitivityIcon = createIconComponent("/icons/responsive/large_sensitivty.png", "Sensitivity");
