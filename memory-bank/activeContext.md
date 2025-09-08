@@ -1,4 +1,13 @@
-# Active Context - COMPLETED
+# Active Context
+
+## Recent Bug Fix (9/4/2025)
+Fixed the double character typing bug when starting to edit a cell. The issue was that when pressing a key to start editing, the character was being added twice (e.g., '=' became '=='). 
+
+### Root Cause
+In ExcelGrid.tsx, the `handleKeyDown` function was setting the initial character and then focusing the input field, which was receiving the same keypress event again.
+
+### Solution
+Added `e.preventDefault()` to prevent the default browser behavior and stop the character from being processed twice when initiating cell editing.
 
 ## Accomplished Tasks ✅
 Successfully made all major ribbon buttons functional with real Excel-like commands:

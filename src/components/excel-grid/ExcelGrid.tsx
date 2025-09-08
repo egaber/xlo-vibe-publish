@@ -349,9 +349,16 @@ let borderClasses = 'dancing-ants';
       default:
         // Start editing if a printable character is pressed
         if (e.key.length === 1 && !e.ctrlKey && !e.altKey) {
+          e.preventDefault(); // Prevent the character from being typed twice
           setEditingCell({ row, col });
           setEditValue(e.key);
-          setTimeout(() => editInputRef.current?.focus(), 0);
+          setTimeout(() => {
+            if (editInputRef.current) {
+              editInputRef.current.focus();
+              // Move cursor to the end of the input
+              editInputRef.current.setSelectionRange(1, 1);
+            }
+          }, 0);
         }
         return;
     }
