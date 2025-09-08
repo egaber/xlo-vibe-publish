@@ -1,4 +1,4 @@
-import { CellData, CellFormat, ClipboardData, Selection } from '../types/cellTypes';
+import { CellData, CellFormat, ClipboardData, Selection, MultiSelection } from '../types/cellTypes';
 
 // Helper function to get cell reference from row/col
 export const getCellRef = (row: number, col: number): string => {
@@ -47,6 +47,23 @@ export const getSelectionCellRefs = (selection: Selection): string[] => {
   }
   
   return refs;
+};
+
+// Get all cell references in a multi-selection
+export const getMultiSelectionCellRefs = (multiSelection: MultiSelection): string[] => {
+  const refs = new Set<string>();
+  
+  // Add primary selection
+  const primaryRefs = getSelectionCellRefs(multiSelection.primary);
+  primaryRefs.forEach(ref => refs.add(ref));
+  
+  // Add additional selections
+  multiSelection.additional.forEach(selection => {
+    const additionalRefs = getSelectionCellRefs(selection);
+    additionalRefs.forEach(ref => refs.add(ref));
+  });
+  
+  return Array.from(refs);
 };
 
 // Apply formatting to a cell

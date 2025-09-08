@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { evaluateFormula, FormulaContext } from "@/utils/formulaEngine";
-import { CellData, Selection } from "@/types/cellTypes";
+import { CellData, Selection, MultiSelection } from "@/types/cellTypes";
 import { getCellStyles, formatCellValue } from "@/utils/cellFormatting";
 
 interface FormulaReference {
@@ -8,6 +8,7 @@ interface FormulaReference {
   range: string;
   color: string;
 }
+
 
 interface ExcelGridProps {
   onCellSelect: (cellRef: string, value: string) => void;
@@ -18,6 +19,7 @@ interface ExcelGridProps {
   rangeSelectionStart?: string | null;
   onCellClickInFormulaMode?: (cellRef: string, isRangeSelection?: boolean) => void;
   onSelectionChange?: (selection: Selection) => void;
+  onMultiSelectionChange?: (multiSelection: MultiSelection) => void;
   onColumnSelect?: (colIndex: number) => void;
   onSelectAll?: () => void;
   externalSelection?: Selection;
@@ -114,6 +116,7 @@ export const ExcelGrid = ({
   rangeSelectionStart = null,
   onCellClickInFormulaMode,
   onSelectionChange,
+  onMultiSelectionChange,
   onColumnSelect,
   onSelectAll,
   externalSelection,
@@ -125,6 +128,10 @@ export const ExcelGrid = ({
     start: { row: 0, col: 0 },
     end: { row: 0, col: 0 }
   });
+  const [multiSelection, setMultiSelection] = useState<MultiSelection>({
+    primary: { start: { row: 0, col: 0 }, end: { row: 0, col: 0 } },
+    additional: []
+  });
   const [isSelecting, setIsSelecting] = useState(false);
   const [editingCell, setEditingCell] = useState<{ row: number; col: number } | null>(null);
   const [editValue, setEditValue] = useState("");
@@ -132,25 +139,74 @@ export const ExcelGrid = ({
   const editInputRef = useRef<HTMLInputElement>(null);
 
   const isInSelection = useCallback((row: number, col: number): boolean => {
-    const minRow = Math.min(selection.start.row, selection.end.row);
-    const maxRow = Math.max(selection.start.row, selection.end.row);
-    const minCol = Math.min(selection.start.col, selection.end.col);
-    const maxCol = Math.max(selection.start.col, selection.end.col);
+    // Check primary selection
+    const minRow = Math.min(multiSelection.primary.start.row, multiSelection.primary.end.row);
+    const maxRow = Math.max(multiSelection.primary.start.row, multiSelection.primary.end.row);
+    const minCol = Math.min(multiSelection.primary.start.col, multiSelection.primary.end.col);
+    const maxCol = Math.max(multiSelection.primary.start.col, multiSelection.primary.end.col);
     
-    return row >= minRow && row <= maxRow && col >= minCol && col <= maxCol;
-  }, [selection]);
+    if (row >= minRow && row <= maxRow && col >= minCol && col <= maxCol) {
+      return true;
+    }
+    
+    // Check additional selections
+    for (const sel of multiSelection.additional) {
+      const selMinRow = Math.min(sel.start.row, sel.end.row);
+      const selMaxRow = Math.max(sel.start.row, sel.end.row);
+      const selMinCol = Math.min(sel.start.col, sel.end.col);
+      const selMaxCol = Math.max(sel.start.col, sel.end.col);
+      
+      if (row >= selMinRow && row <= selMaxRow && col >= selMinCol && col <= selMaxCol) {
+        return true;
+      }
+    }
+    
+    return false;
+  }, [multiSelection]);
 
   const isRowSelected = useCallback((row: number): boolean => {
-    const minRow = Math.min(selection.start.row, selection.end.row);
-    const maxRow = Math.max(selection.start.row, selection.end.row);
-    return row >= minRow && row <= maxRow;
-  }, [selection]);
+    // Check primary selection
+    const primaryMinRow = Math.min(multiSelection.primary.start.row, multiSelection.primary.end.row);
+    const primaryMaxRow = Math.max(multiSelection.primary.start.row, multiSelection.primary.end.row);
+    
+    if (row >= primaryMinRow && row <= primaryMaxRow) {
+      return true;
+    }
+    
+    // Check additional selections
+    for (const sel of multiSelection.additional) {
+      const selMinRow = Math.min(sel.start.row, sel.end.row);
+      const selMaxRow = Math.max(sel.start.row, sel.end.row);
+      
+      if (row >= selMinRow && row <= selMaxRow) {
+        return true;
+      }
+    }
+    
+    return false;
+  }, [multiSelection]);
 
   const isColSelected = useCallback((col: number): boolean => {
-    const minCol = Math.min(selection.start.col, selection.end.col);
-    const maxCol = Math.max(selection.start.col, selection.end.col);
-    return col >= minCol && col <= maxCol;
-  }, [selection]);
+    // Check primary selection
+    const primaryMinCol = Math.min(multiSelection.primary.start.col, multiSelection.primary.end.col);
+    const primaryMaxCol = Math.max(multiSelection.primary.start.col, multiSelection.primary.end.col);
+    
+    if (col >= primaryMinCol && col <= primaryMaxCol) {
+      return true;
+    }
+    
+    // Check additional selections
+    for (const sel of multiSelection.additional) {
+      const selMinCol = Math.min(sel.start.col, sel.end.col);
+      const selMaxCol = Math.max(sel.start.col, sel.end.col);
+      
+      if (col >= selMinCol && col <= selMaxCol) {
+        return true;
+      }
+    }
+    
+    return false;
+  }, [multiSelection]);
 
   // Helper function to check if cell is in formula reference
   const isInFormulaReference = useCallback((cellRef: string): FormulaReference | null => {
@@ -202,27 +258,59 @@ export const ExcelGrid = ({
   const getRangeBorders = useCallback((row: number, col: number) => {
     if (!isInSelection(row, col)) return '';
     
-    const minRow = Math.min(selection.start.row, selection.end.row);
-    const maxRow = Math.max(selection.start.row, selection.end.row);
-    const minCol = Math.min(selection.start.col, selection.end.col);
-    const maxCol = Math.max(selection.start.col, selection.end.col);
+    // Check if cell is in primary selection
+    const primaryMinRow = Math.min(multiSelection.primary.start.row, multiSelection.primary.end.row);
+    const primaryMaxRow = Math.max(multiSelection.primary.start.row, multiSelection.primary.end.row);
+    const primaryMinCol = Math.min(multiSelection.primary.start.col, multiSelection.primary.end.col);
+    const primaryMaxCol = Math.max(multiSelection.primary.start.col, multiSelection.primary.end.col);
     
-    const isTopEdge = row === minRow;
-    const isBottomEdge = row === maxRow;
-    const isLeftEdge = col === minCol;
-    const isRightEdge = col === maxCol;
+    const isInPrimary = row >= primaryMinRow && row <= primaryMaxRow && 
+                        col >= primaryMinCol && col <= primaryMaxCol;
     
-let borderClasses = 'dancing-ants';
+    if (isInPrimary) {
+      const isTopEdge = row === primaryMinRow;
+      const isBottomEdge = row === primaryMaxRow;
+      const isLeftEdge = col === primaryMinCol;
+      const isRightEdge = col === primaryMaxCol;
+      
+      let borderClasses = 'dancing-ants';
+      
+      if (isTopEdge) borderClasses += ' border-t-2 border-t-[#127d42]';
+      if (isBottomEdge) borderClasses += ' border-b-2 border-b-[#127d42]';
+      if (isLeftEdge) borderClasses += ' border-l-2 border-l-[#127d42]';
+      if (isRightEdge) borderClasses += ' border-r-2 border-r-[#127d42]';
+      
+      return borderClasses;
+    }
     
-    if (isTopEdge) borderClasses += ' border-t-2 border-t-[#127d42]';
-    if (isBottomEdge) borderClasses += ' border-b-2 border-b-[#127d42]';
-    if (isLeftEdge) borderClasses += ' border-l-2 border-l-[#127d42]';
-    if (isRightEdge) borderClasses += ' border-r-2 border-r-[#127d42]';
+    // Check additional selections
+    for (const sel of multiSelection.additional) {
+      const selMinRow = Math.min(sel.start.row, sel.end.row);
+      const selMaxRow = Math.max(sel.start.row, sel.end.row);
+      const selMinCol = Math.min(sel.start.col, sel.end.col);
+      const selMaxCol = Math.max(sel.start.col, sel.end.col);
+      
+      if (row >= selMinRow && row <= selMaxRow && col >= selMinCol && col <= selMaxCol) {
+        const isTopEdge = row === selMinRow;
+        const isBottomEdge = row === selMaxRow;
+        const isLeftEdge = col === selMinCol;
+        const isRightEdge = col === selMaxCol;
+        
+        let borderClasses = '';
+        
+        if (isTopEdge) borderClasses += ' border-t-2 border-t-[#127d42]';
+        if (isBottomEdge) borderClasses += ' border-b-2 border-b-[#127d42]';
+        if (isLeftEdge) borderClasses += ' border-l-2 border-l-[#127d42]';
+        if (isRightEdge) borderClasses += ' border-r-2 border-r-[#127d42]';
+        
+        return borderClasses;
+      }
+    }
     
-    return borderClasses;
-  }, [selection, isInSelection]);
+    return '';
+  }, [multiSelection, isInSelection]);
 
-  const handleCellClick = (row: number, col: number, isShiftClick: boolean = false) => {
+  const handleCellClick = (row: number, col: number, isShiftClick: boolean = false, isCtrlClick: boolean = false) => {
     if (editingCell) {
       finishEditing();
     }
@@ -235,15 +323,42 @@ let borderClasses = 'dancing-ants';
       return;
     }
 
-    if (isShiftClick && selection.start) {
-      setSelection({
-        start: selection.start,
-        end: { row, col }
-      });
-    } else {
-      setSelection({
+    if (isCtrlClick) {
+      // Add to multi-selection
+      const newSelection: Selection = {
         start: { row, col },
         end: { row, col }
+      };
+      
+      setMultiSelection(prev => ({
+        primary: newSelection,
+        additional: [...prev.additional, prev.primary]
+      }));
+      
+      setSelection(newSelection);
+    } else if (isShiftClick && selection.start) {
+      // Extend current selection
+      const newSelection: Selection = {
+        start: selection.start,
+        end: { row, col }
+      };
+      
+      setSelection(newSelection);
+      setMultiSelection({
+        primary: newSelection,
+        additional: []
+      });
+    } else {
+      // Single cell selection - clear multi-selection
+      const newSelection: Selection = {
+        start: { row, col },
+        end: { row, col }
+      };
+      
+      setSelection(newSelection);
+      setMultiSelection({
+        primary: newSelection,
+        additional: []
       });
     }
 
@@ -259,17 +374,28 @@ let borderClasses = 'dancing-ants';
     setTimeout(() => editInputRef.current?.focus(), 0);
   };
 
-  const handleMouseDown = (row: number, col: number) => {
+  const handleMouseDown = (row: number, col: number, e: React.MouseEvent) => {
     setIsSelecting(true);
-    handleCellClick(row, col);
+    handleCellClick(row, col, e.shiftKey, e.ctrlKey);
   };
 
   const handleMouseOver = (row: number, col: number) => {
     if (isSelecting) {
-      setSelection(prev => ({
-        start: prev.start,
+      const newSelection: Selection = {
+        start: selection.start,
         end: { row, col }
-      }));
+      };
+      
+      setSelection(newSelection);
+      
+      // Update primary selection if we're dragging (not ctrl-clicking)
+      if (multiSelection.additional.length === 0 || !multiSelection.additional.some(sel => 
+        sel.start.row === selection.start.row && sel.start.col === selection.start.col)) {
+        setMultiSelection(prev => ({
+          ...prev,
+          primary: newSelection
+        }));
+      }
     }
   };
 
@@ -375,7 +501,8 @@ let borderClasses = 'dancing-ants';
     const cellInfo = cellData[cellRef] || { value: "" };
     onCellSelect(currentSelection, cellInfo.value);
     onSelectionChange?.(selection);
-  }, [selection, cellData, onCellSelect, onSelectionChange]);
+    onMultiSelectionChange?.(multiSelection);
+  }, [selection, multiSelection, cellData, onCellSelect, onSelectionChange, onMultiSelectionChange]);
 
   useEffect(() => {
     document.addEventListener('mouseup', handleMouseUp);
@@ -443,14 +570,15 @@ let borderClasses = 'dancing-ants';
               const cellRef = getCellRef(rowIndex, colIndex);
               const cellInfo = cellData[cellRef] || { value: "" };
               const isSelected = isInSelection(rowIndex, colIndex);
-              const isActiveCell = selection.start.row === rowIndex && selection.start.col === colIndex;
+              const isActiveCell = multiSelection.primary.start.row === rowIndex && 
+                                 multiSelection.primary.start.col === colIndex;
               const isEditing = editingCell?.row === rowIndex && editingCell?.col === colIndex;
               const rangeBorders = getRangeBorders(rowIndex, colIndex);
               
-              // Check if this is the bottom-right cell of the selection
-              const maxRow = Math.max(selection.start.row, selection.end.row);
-              const maxCol = Math.max(selection.start.col, selection.end.col);
-              const isBottomRightCell = isSelected && rowIndex === maxRow && colIndex === maxCol;
+              // Check if this is the bottom-right cell of the primary selection
+              const maxRow = Math.max(multiSelection.primary.start.row, multiSelection.primary.end.row);
+              const maxCol = Math.max(multiSelection.primary.start.col, multiSelection.primary.end.col);
+              const isBottomRightCell = rowIndex === maxRow && colIndex === maxCol;
               
               // Check if cell is in formula reference
               const formulaRef = isInFormulaReference(cellRef);
@@ -559,7 +687,7 @@ let borderClasses = 'dancing-ants';
                     minWidth: `${renderCellWidth}px`,
                     flexShrink: 0
                   }}
-                  onMouseDown={() => handleMouseDown(rowIndex, colIndex)}
+                  onMouseDown={(e) => handleMouseDown(rowIndex, colIndex, e)}
                   onMouseOver={() => handleMouseOver(rowIndex, colIndex)}
                   onDoubleClick={() => handleCellDoubleClick(rowIndex, colIndex)}
                 >

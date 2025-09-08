@@ -7,9 +7,10 @@ import { ColumnHeaders } from "@/components/excel-grid/ColumnHeaders";
 import { SheetTabBar, Sheet } from "@/components/excel-grid/SheetTabBar";
 import { StatusBar } from "@/components/excel-grid/StatusBar";
 import { evaluateFormula, FormulaContext } from "@/utils/formulaEngine";
-import { CellData, ClipboardData, Selection, RibbonActions, CellFormat } from "@/types/cellTypes";
+import { CellData, ClipboardData, Selection, MultiSelection, RibbonActions, CellFormat } from "@/types/cellTypes";
 import { 
-  getSelectionCellRefs, 
+  getSelectionCellRefs,
+  getMultiSelectionCellRefs,
   applyCellFormat, 
   createClipboardData, 
   applyClipboardData,
@@ -62,6 +63,12 @@ const Index = () => {
   const [currentSelection, setCurrentSelection] = useState<Selection>({
     start: { row: 0, col: 0 },
     end: { row: 0, col: 0 }
+  });
+  
+  // Multi-selection state
+  const [currentMultiSelection, setCurrentMultiSelection] = useState<MultiSelection>({
+    primary: { start: { row: 0, col: 0 }, end: { row: 0, col: 0 } },
+    additional: []
   });
   
   // Column width state
@@ -379,7 +386,7 @@ const Index = () => {
 
     // Font formatting
     toggleBold: () => {
-      const cellRefs = getSelectionCellRefs(currentSelection);
+      const cellRefs = getMultiSelectionCellRefs(currentMultiSelection);
       const newCellData = { ...cellData };
       
       cellRefs.forEach(ref => {
@@ -392,7 +399,7 @@ const Index = () => {
     },
 
     toggleItalic: () => {
-      const cellRefs = getSelectionCellRefs(currentSelection);
+      const cellRefs = getMultiSelectionCellRefs(currentMultiSelection);
       const newCellData = { ...cellData };
       
       cellRefs.forEach(ref => {
@@ -405,7 +412,7 @@ const Index = () => {
     },
 
     toggleUnderline: () => {
-      const cellRefs = getSelectionCellRefs(currentSelection);
+      const cellRefs = getMultiSelectionCellRefs(currentMultiSelection);
       const newCellData = { ...cellData };
       
       cellRefs.forEach(ref => {
@@ -418,7 +425,7 @@ const Index = () => {
     },
 
     setFontFamily: (family: string) => {
-      const cellRefs = getSelectionCellRefs(currentSelection);
+      const cellRefs = getMultiSelectionCellRefs(currentMultiSelection);
       const newCellData = { ...cellData };
       
       cellRefs.forEach(ref => {
@@ -430,7 +437,7 @@ const Index = () => {
     },
 
     setFontSize: (size: number) => {
-      const cellRefs = getSelectionCellRefs(currentSelection);
+      const cellRefs = getMultiSelectionCellRefs(currentMultiSelection);
       const newCellData = { ...cellData };
       
       cellRefs.forEach(ref => {
@@ -442,7 +449,7 @@ const Index = () => {
     },
 
     increaseFontSize: () => {
-      const cellRefs = getSelectionCellRefs(currentSelection);
+      const cellRefs = getMultiSelectionCellRefs(currentMultiSelection);
       const newCellData = { ...cellData };
       
       cellRefs.forEach(ref => {
@@ -455,7 +462,7 @@ const Index = () => {
     },
 
     decreaseFontSize: () => {
-      const cellRefs = getSelectionCellRefs(currentSelection);
+      const cellRefs = getMultiSelectionCellRefs(currentMultiSelection);
       const newCellData = { ...cellData };
       
       cellRefs.forEach(ref => {
@@ -469,7 +476,7 @@ const Index = () => {
 
     // Colors
     setTextColor: (color: string) => {
-      const cellRefs = getSelectionCellRefs(currentSelection);
+      const cellRefs = getMultiSelectionCellRefs(currentMultiSelection);
       const newCellData = { ...cellData };
       
       cellRefs.forEach(ref => {
@@ -481,7 +488,7 @@ const Index = () => {
     },
 
     setBackgroundColor: (color: string) => {
-      const cellRefs = getSelectionCellRefs(currentSelection);
+      const cellRefs = getMultiSelectionCellRefs(currentMultiSelection);
       const newCellData = { ...cellData };
       
       cellRefs.forEach(ref => {
@@ -494,7 +501,7 @@ const Index = () => {
 
     // Alignment
     setHorizontalAlignment: (align: 'left' | 'center' | 'right') => {
-      const cellRefs = getSelectionCellRefs(currentSelection);
+      const cellRefs = getMultiSelectionCellRefs(currentMultiSelection);
       const newCellData = { ...cellData };
       
       cellRefs.forEach(ref => {
@@ -506,7 +513,7 @@ const Index = () => {
     },
 
     setVerticalAlignment: (align: 'top' | 'middle' | 'bottom') => {
-      const cellRefs = getSelectionCellRefs(currentSelection);
+      const cellRefs = getMultiSelectionCellRefs(currentMultiSelection);
       const newCellData = { ...cellData };
       
       cellRefs.forEach(ref => {
@@ -519,7 +526,7 @@ const Index = () => {
 
     // Number formatting
     setNumberFormat: (format: CellFormat['numberFormat']) => {
-      const cellRefs = getSelectionCellRefs(currentSelection);
+      const cellRefs = getMultiSelectionCellRefs(currentMultiSelection);
       const newCellData = { ...cellData };
       
       cellRefs.forEach(ref => {
@@ -531,7 +538,7 @@ const Index = () => {
     },
 
     increaseDecimals: () => {
-      const cellRefs = getSelectionCellRefs(currentSelection);
+      const cellRefs = getMultiSelectionCellRefs(currentMultiSelection);
       const newCellData = { ...cellData };
       
       cellRefs.forEach(ref => {
@@ -551,7 +558,7 @@ const Index = () => {
     },
 
     decreaseDecimals: () => {
-      const cellRefs = getSelectionCellRefs(currentSelection);
+      const cellRefs = getMultiSelectionCellRefs(currentMultiSelection);
       const newCellData = { ...cellData };
       
       cellRefs.forEach(ref => {
@@ -585,6 +592,11 @@ const Index = () => {
   // Handle selection updates from ExcelGrid
   const handleSelectionChange = (selection: Selection) => {
     setCurrentSelection(selection);
+  };
+  
+  // Handle multi-selection updates from ExcelGrid
+  const handleMultiSelectionChange = (multiSelection: MultiSelection) => {
+    setCurrentMultiSelection(multiSelection);
   };
 
   // Handle column selection
@@ -633,6 +645,7 @@ const Index = () => {
         <ColumnHeaders 
           ref={columnHeadersRef}
           selection={currentSelection}
+          multiSelection={currentMultiSelection}
           onColumnSelect={handleColumnSelect}
           onSelectAll={handleSelectAll}
           columnWidths={columnWidths}
@@ -651,6 +664,7 @@ const Index = () => {
           rangeSelectionStart={rangeSelectionStart}
           onCellClickInFormulaMode={handleCellClickInFormulaMode}
           onSelectionChange={handleSelectionChange}
+          onMultiSelectionChange={handleMultiSelectionChange}
           onColumnSelect={handleColumnSelect}
           onSelectAll={handleSelectAll}
           externalSelection={currentSelection}

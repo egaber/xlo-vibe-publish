@@ -1,8 +1,9 @@
-import { Selection } from "@/types/cellTypes";
+import { Selection, MultiSelection } from "@/types/cellTypes";
 import { forwardRef, useState, useRef, useCallback, useEffect } from "react";
 
 interface ColumnHeadersProps {
   selection?: Selection;
+  multiSelection?: MultiSelection;
   onColumnSelect: (colIndex: number) => void;
   onSelectAll?: () => void;
   columnWidths?: number[];
@@ -25,6 +26,7 @@ const getColumnName = (index: number): string => {
 
 export const ColumnHeaders = forwardRef<HTMLDivElement, ColumnHeadersProps>(({ 
   selection, 
+  multiSelection,
   onColumnSelect, 
   onSelectAll, 
   columnWidths = Array(GRID_COLS).fill(DEFAULT_COLUMN_WIDTH),
@@ -35,7 +37,31 @@ export const ColumnHeaders = forwardRef<HTMLDivElement, ColumnHeadersProps>(({
   const [startX, setStartX] = useState(0);
   const [startWidth, setStartWidth] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  
   const isColSelected = (colIndex: number): boolean => {
+    // Use multiSelection if available, otherwise fall back to selection
+    if (multiSelection) {
+      // Check primary selection
+      const primaryMinCol = Math.min(multiSelection.primary.start.col, multiSelection.primary.end.col);
+      const primaryMaxCol = Math.max(multiSelection.primary.start.col, multiSelection.primary.end.col);
+      
+      if (colIndex >= primaryMinCol && colIndex <= primaryMaxCol) {
+        return true;
+      }
+      
+      // Check additional selections
+      for (const sel of multiSelection.additional) {
+        const selMinCol = Math.min(sel.start.col, sel.end.col);
+        const selMaxCol = Math.max(sel.start.col, sel.end.col);
+        
+        if (colIndex >= selMinCol && colIndex <= selMaxCol) {
+          return true;
+        }
+      }
+      
+      return false;
+    }
+    
     if (!selection) return false;
     const { start, end } = selection;
     const minCol = Math.min(start.col, end.col);

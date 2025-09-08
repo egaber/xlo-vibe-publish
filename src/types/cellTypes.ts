@@ -58,6 +58,12 @@ export interface Selection {
   end: { row: number; col: number };
 }
 
+// Multi-selection interface
+export interface MultiSelection {
+  primary: Selection;
+  additional: Selection[];
+}
+
 // Ribbon actions
 export interface RibbonActions {
   // Clipboard
