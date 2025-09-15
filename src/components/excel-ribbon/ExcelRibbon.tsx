@@ -3,6 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { RibbonTab } from "./RibbonTab";
 import { RibbonGroup } from "./RibbonGroup";
 import { RibbonDropdown } from "./RibbonDropdown";
@@ -23,6 +30,7 @@ import { SensitivityDropdownMobile } from "./SensitivityDropdownMobile";
 import { CopilotDropdownMobile } from "./CopilotDropdownMobile";
 import { RibbonActions } from "@/types/cellTypes";
 import { useSvgIconConversion } from "@/hooks/useSvgIconConversion";
+import { openExcelFile, importExcelFile, ImportedExcelData } from "@/utils/excelImport";
 import { 
   UndoIcon,
   RedoIcon,
@@ -93,9 +101,11 @@ import {
 
 interface ExcelRibbonProps {
   ribbonActions: RibbonActions;
+  onFileOpen?: (data: ImportedExcelData) => void;
+  onClearContent?: () => void;
 }
 
-export const ExcelRibbon = ({ ribbonActions }: ExcelRibbonProps) => {
+export const ExcelRibbon = ({ ribbonActions, onFileOpen, onClearContent }: ExcelRibbonProps) => {
   const [activeTab, setActiveTab] = useState("Home");
   const [currentTextColor, setCurrentTextColor] = useState("#FF0000");
   const [currentBackgroundColor, setCurrentBackgroundColor] = useState("#FFFF00");
@@ -130,12 +140,67 @@ export const ExcelRibbon = ({ ribbonActions }: ExcelRibbonProps) => {
     setTestInputValue("");
   };
 
+  const handleOpenExcelFile = async () => {
+    try {
+      const file = await openExcelFile();
+      const data = await importExcelFile(file);
+      if (onFileOpen) {
+        onFileOpen(data);
+      }
+    } catch (error) {
+      console.error('Failed to open Excel file:', error);
+    }
+  };
+
   return (
     <div className="w-full bg-gray-50">
       {/* Tab Navigation */}
       <div className="flex items-center justify-between bg-gray-50">
         <div className="flex">
-          {tabs.map((tab) => (
+          {/* File dropdown menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none">
+                File
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-56">
+              <DropdownMenuItem onClick={handleOpenExcelFile}>
+                <FileSpreadsheetIcon className="w-4 h-4 mr-2" />
+                Open Excel File
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => console.log('New')}>
+                <PlusIcon className="w-4 h-4 mr-2" />
+                New
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => console.log('Save')}>
+                <SaveIcon className="w-4 h-4 mr-2" />
+                Save
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => console.log('Save As')}>
+                <SaveIcon className="w-4 h-4 mr-2" />
+                Save As...
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={onClearContent}>
+                <ClearIcon className="w-4 h-4 mr-2" />
+                Clear Content
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => console.log('Share')}>
+                <ShareIcon className="w-4 h-4 mr-2" />
+                Share
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => console.log('Export')}>
+                <FileSpreadsheetIcon className="w-4 h-4 mr-2" />
+                Export
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
+          {/* Regular ribbon tabs */}
+          {tabs.filter(tab => tab !== "File").map((tab) => (
             <RibbonTab
               key={tab}
               active={activeTab === tab}

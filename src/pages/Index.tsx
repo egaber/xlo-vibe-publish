@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import ExcelTopBar from "@/components/excel-ribbon/ExcelTopBar";
 import { ExcelRibbon } from "@/components/excel-ribbon/ExcelRibbon";
+import { ImportedExcelData } from "@/utils/excelImport";
 import { FormulaBar } from "@/components/excel-grid/FormulaBar";
 import { ExcelGrid } from "@/components/excel-grid/ExcelGrid";
 import { ColumnHeaders } from "@/components/excel-grid/ColumnHeaders";
@@ -737,12 +738,108 @@ const Index = () => {
     });
   };
 
+  // Handle Excel file import
+  const handleFileOpen = (data: ImportedExcelData) => {
+    console.log('Imported Excel data:', data);
+    
+    // Clear existing sheets
+    const newSheets: Sheet[] = [];
+    const newSheetDataMap: Record<string, SheetData> = {};
+    
+    // Create sheets from imported data
+    data.sheets.forEach((importedSheet, index) => {
+      const sheetId = `sheet${Date.now()}_${index}`;
+      
+      newSheets.push({
+        id: sheetId,
+        name: importedSheet.name,
+        isProtected: false,
+        isVisible: true
+      });
+      
+      newSheetDataMap[sheetId] = {
+        cellData: importedSheet.data,
+        selectedCell: "A1",
+        selectedCellValue: ""
+      };
+    });
+    
+    // Update state with imported data
+    setSheets(newSheets);
+    setSheetDataMap(newSheetDataMap);
+    setActiveSheetId(newSheets[0]?.id || "sheet1");
+    
+    // Reset history for new sheets
+    const newHistory: Record<string, HistoryEntry[]> = {};
+    const newHistoryIndex: Record<string, number> = {};
+    newSheets.forEach(sheet => {
+      newHistory[sheet.id] = [];
+      newHistoryIndex[sheet.id] = -1;
+    });
+    setHistory(newHistory);
+    setHistoryIndex(newHistoryIndex);
+  };
+
+  // Handle clearing all content
+  const handleClearContent = () => {
+    // Reset to default sheets
+    const defaultSheets: Sheet[] = [
+      { id: "sheet1", name: "Sheet1", isProtected: false, isVisible: true },
+      { id: "sheet2", name: "Sheet2", isProtected: false, isVisible: true },
+      { id: "sheet3", name: "Sheet3", isProtected: false, isVisible: true },
+    ];
+    
+    const defaultSheetDataMap: Record<string, SheetData> = {
+      sheet1: { cellData: {}, selectedCell: "A1", selectedCellValue: "" },
+      sheet2: { cellData: {}, selectedCell: "A1", selectedCellValue: "" },
+      sheet3: { cellData: {}, selectedCell: "A1", selectedCellValue: "" },
+    };
+    
+    // Reset all state
+    setSheets(defaultSheets);
+    setSheetDataMap(defaultSheetDataMap);
+    setActiveSheetId("sheet1");
+    
+    // Reset history
+    setHistory({
+      sheet1: [],
+      sheet2: [],
+      sheet3: [],
+    });
+    setHistoryIndex({
+      sheet1: -1,
+      sheet2: -1,
+      sheet3: -1,
+    });
+    
+    // Reset column widths
+    setColumnWidths(Array(39).fill(80));
+    
+    // Reset clipboard
+    setClipboardData(null);
+    
+    // Reset formula building mode
+    setIsFormulaBuildingMode(false);
+    setFormulaReferences([]);
+    setRangeSelectionStart(null);
+    
+    // Reset selections
+    setCurrentSelection({
+      start: { row: 0, col: 0 },
+      end: { row: 0, col: 0 }
+    });
+    setCurrentMultiSelection({
+      primary: { start: { row: 0, col: 0 }, end: { row: 0, col: 0 } },
+      additional: []
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Fixed header area - stays at top */}
       <div className="fixed top-0 left-0 right-0 z-50 bg-gray-50 flex-shrink-0">
         <ExcelTopBar />
-        <ExcelRibbon ribbonActions={ribbonActions} />
+        <ExcelRibbon ribbonActions={ribbonActions} onFileOpen={handleFileOpen} onClearContent={handleClearContent} />
         <FormulaBar
           selectedCell={selectedCell}
           cellValue={selectedCellValue}
