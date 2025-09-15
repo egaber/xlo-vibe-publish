@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import ExcelTopBar from "@/components/excel-ribbon/ExcelTopBar";
 import { ExcelRibbon } from "@/components/excel-ribbon/ExcelRibbon";
 import { ImportedExcelData } from "@/utils/excelImport";
@@ -19,6 +19,8 @@ import {
   DEFAULT_CELL_FORMAT 
 } from "@/utils/cellFormatting";
 import { convertSvgImages } from "@/utils/svgIconUtils";
+import { getBranchFromUrl, retrieveBranchState, cleanupOldBranches } from "@/utils/branchState";
+import { useToast } from "@/hooks/use-toast";
 
 interface SheetData {
   cellData: Record<string, CellData>;
@@ -40,6 +42,8 @@ interface HistoryEntry {
 }
 
 const Index = () => {
+  const { toast } = useToast();
+  
   // Sheet management
   const [sheets, setSheets] = useState<Sheet[]>([
     { id: "sheet1", name: "Sheet1", isProtected: false, isVisible: true },
@@ -117,27 +121,8 @@ const Index = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Keyboard shortcuts for undo/redo
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Check for Ctrl+Z (undo)
-      if (e.ctrlKey && e.key === 'z' && !e.shiftKey) {
-        e.preventDefault();
-        ribbonActions.undo();
-      }
-      // Check for Ctrl+Y or Ctrl+Shift+Z (redo)
-      else if ((e.ctrlKey && e.key === 'y') || (e.ctrlKey && e.shiftKey && e.key === 'z')) {
-        e.preventDefault();
-        ribbonActions.redo();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [history, historyIndex, activeSheetId, sheetDataMap]); // Dependencies for undo/redo
-
   // Helper function to update current sheet data with history tracking
-  const updateCurrentSheetData = (updates: Partial<SheetData>, addToHistory: boolean = true) => {
+  const updateCurrentSheetData = useCallback((updates: Partial<SheetData>, addToHistory: boolean = true) => {
     // Save current state to history before updating
     if (addToHistory) {
       const currentData = sheetDataMap[activeSheetId];
@@ -182,7 +167,7 @@ const Index = () => {
         ...updates
       }
     }));
-  };
+  }, [activeSheetId, sheetDataMap, setSheetDataMap, historyIndex, maxHistorySize]);
 
   // Scroll synchronization handler
   const handleGridScroll = (scrollLeft: number) => {
@@ -443,7 +428,7 @@ const Index = () => {
   };
 
   // Ribbon Actions Implementation
-  const ribbonActions: RibbonActions = {
+  const ribbonActions: RibbonActions = useMemo(() => ({
     // Clipboard operations
     copy: () => {
       const data = createClipboardData(cellData, currentSelection, 'copy');
@@ -697,7 +682,85 @@ const Index = () => {
         }));
       }
     }
-  };
+  }), [
+    cellData,
+    currentSelection,
+    currentMultiSelection,
+    clipboardData,
+    activeSheetId,
+    history,
+    historyIndex,
+    updateCurrentSheetData
+  ]);
+
+  // Keyboard shortcuts for undo/redo
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Check for Ctrl+Z (undo)
+      if (e.ctrlKey && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        ribbonActions.undo();
+      }
+      // Check for Ctrl+Y or Ctrl+Shift+Z (redo)
+      else if ((e.ctrlKey && e.key === 'y') || (e.ctrlKey && e.shiftKey && e.key === 'z')) {
+        e.preventDefault();
+        ribbonActions.redo();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [ribbonActions]); // Dependencies for undo/redo
+
+  // Load shared branch state if URL contains branch parameters
+  useEffect(() => {
+    const branchInfo = getBranchFromUrl();
+    if (branchInfo) {
+      const { branchId, code } = branchInfo;
+      
+      try {
+        const sharedState = retrieveBranchState(branchId);
+        
+        if (sharedState) {
+          // Load the shared state
+          setSheets(sharedState.sheets);
+          setSheetDataMap(sharedState.sheetDataMap);
+          setActiveSheetId(sharedState.activeSheetId);
+          setColumnWidths(sharedState.columnWidths);
+          
+          toast({
+            title: "Shared State Loaded",
+            description: `Successfully loaded shared Excel state (Code: ${code})`,
+            duration: 5000,
+          });
+          
+          // Clean up URL parameters to avoid reloading on refresh
+          const url = new URL(window.location.href);
+          url.searchParams.delete('branch');
+          url.searchParams.delete('code');
+          window.history.replaceState({}, '', url.toString());
+        } else {
+          toast({
+            title: "Shared State Not Found",
+            description: "The shared Excel state could not be found or has expired.",
+            variant: "destructive",
+            duration: 5000,
+          });
+        }
+      } catch (error) {
+        console.error('Failed to load shared state:', error);
+        toast({
+          title: "Load Failed",
+          description: "Failed to load the shared Excel state.",
+          variant: "destructive",
+          duration: 5000,
+        });
+      }
+    }
+    
+    // Clean up old branches periodically
+    cleanupOldBranches();
+  }, [toast]); // Run once on mount
 
   // Handle selection updates from ExcelGrid
   const handleSelectionChange = (selection: Selection) => {
@@ -839,7 +902,15 @@ const Index = () => {
       {/* Fixed header area - stays at top */}
       <div className="fixed top-0 left-0 right-0 z-50 bg-gray-50 flex-shrink-0">
         <ExcelTopBar />
-        <ExcelRibbon ribbonActions={ribbonActions} onFileOpen={handleFileOpen} onClearContent={handleClearContent} />
+        <ExcelRibbon 
+          ribbonActions={ribbonActions} 
+          onFileOpen={handleFileOpen} 
+          onClearContent={handleClearContent}
+          sheets={sheets}
+          sheetDataMap={sheetDataMap}
+          activeSheetId={activeSheetId}
+          columnWidths={columnWidths}
+        />
         <FormulaBar
           selectedCell={selectedCell}
           cellValue={selectedCellValue}

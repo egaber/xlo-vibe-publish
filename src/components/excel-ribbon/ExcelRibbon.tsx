@@ -18,6 +18,10 @@ import { FontDropdown } from "./FontDropdown";
 import { FontSizeDropdown } from "./FontSizeDropdown";
 import { BorderDropdown } from "./BorderDropdown";
 import { ColorPicker } from "./ColorPicker";
+import { serializeCurrentState, generateShareableLink, getBranchFromUrl, retrieveBranchState } from "@/utils/branchState";
+import { useToast } from "@/hooks/use-toast";
+import { Sheet } from "@/components/excel-grid/SheetTabBar";
+import { CellData } from "@/types/cellTypes";
 import { ClipboardDropdown } from "./ClipboardDropdown";
 import { PasteDropdown } from "./PasteDropdown";
 import { FontDropdownMobile } from "./FontDropdownMobile";
@@ -103,15 +107,33 @@ interface ExcelRibbonProps {
   ribbonActions: RibbonActions;
   onFileOpen?: (data: ImportedExcelData) => void;
   onClearContent?: () => void;
+  // State data for sharing
+  sheets: Sheet[];
+  sheetDataMap: Record<string, {
+    cellData: Record<string, CellData>;
+    selectedCell: string;
+    selectedCellValue: string;
+  }>;
+  activeSheetId: string;
+  columnWidths: number[];
 }
 
-export const ExcelRibbon = ({ ribbonActions, onFileOpen, onClearContent }: ExcelRibbonProps) => {
+export const ExcelRibbon = ({ 
+  ribbonActions, 
+  onFileOpen, 
+  onClearContent,
+  sheets,
+  sheetDataMap,
+  activeSheetId,
+  columnWidths
+}: ExcelRibbonProps) => {
   const [activeTab, setActiveTab] = useState("Home");
   const [currentTextColor, setCurrentTextColor] = useState("#FF0000");
   const [currentBackgroundColor, setCurrentBackgroundColor] = useState("#FFFF00");
   const [testDialogOpen, setTestDialogOpen] = useState(false);
   const [taskPaneOpen, setTaskPaneOpen] = useState(false);
   const [testInputValue, setTestInputValue] = useState("");
+  const { toast } = useToast();
 
   // Convert SVG icons when the ribbon re-renders
   useSvgIconConversion(undefined, [activeTab]);
@@ -126,6 +148,40 @@ export const ExcelRibbon = ({ ribbonActions, onFileOpen, onClearContent }: Excel
   const handleBackgroundColorChange = (color: string) => {
     setCurrentBackgroundColor(color);
     ribbonActions.setBackgroundColor(color);
+  };
+
+  // Handle sharing current state
+  const handleShareState = async () => {
+    try {
+      const currentState = serializeCurrentState(
+        sheets,
+        sheetDataMap,
+        activeSheetId,
+        columnWidths,
+        `Shared Excel state from ${new Date().toLocaleString()}`
+      );
+
+      const shareableLink = generateShareableLink(currentState);
+      
+      // Copy to clipboard
+      await navigator.clipboard.writeText(shareableLink.url);
+      
+      toast({
+        title: "State Shared Successfully!",
+        description: `Link copied to clipboard. Share code: ${shareableLink.shortCode}`,
+        duration: 5000,
+      });
+      
+      console.log('Generated shareable link:', shareableLink);
+    } catch (error) {
+      console.error('Failed to share state:', error);
+      toast({
+        title: "Share Failed",
+        description: "Failed to generate shareable link. Please try again.",
+        variant: "destructive",
+        duration: 5000,
+      });
+    }
   };
 
   const handleTestSubmit = () => {
@@ -211,7 +267,18 @@ export const ExcelRibbon = ({ ribbonActions, onFileOpen, onClearContent }: Excel
           ))}
         </div>
         
-        {/* Remove extra right-side controls to match expected UI */}
+        {/* Right side: Share State Button */}
+        <div className="flex items-center">
+          <Button 
+            variant="ribbon" 
+            size="ribbon-sm"
+            className="bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 px-3 py-1"
+            onClick={handleShareState}
+          >
+            <ShareIcon className="w-4 h-4 mr-1" />
+            Share State
+          </Button>
+        </div>
       </div>
 
       {/* Ribbon Content */}
