@@ -31,6 +31,13 @@ interface FormulaReference {
   color: string;
 }
 
+interface HistoryEntry {
+  cellData: Record<string, CellData>;
+  selectedCell: string;
+  selectedCellValue: string;
+  timestamp: number;
+}
+
 const Index = () => {
   // Sheet management
   const [sheets, setSheets] = useState<Sheet[]>([
@@ -74,6 +81,19 @@ const Index = () => {
   // Column width state
   const [columnWidths, setColumnWidths] = useState<number[]>(Array(39).fill(80));
   
+  // Undo/Redo history state
+  const [history, setHistory] = useState<Record<string, HistoryEntry[]>>({
+    sheet1: [],
+    sheet2: [],
+    sheet3: [],
+  });
+  const [historyIndex, setHistoryIndex] = useState<Record<string, number>>({
+    sheet1: -1,
+    sheet2: -1,
+    sheet3: -1,
+  });
+  const maxHistorySize = 50; // Limit history to prevent memory issues
+  
   // Colors for formula references
   const referenceColors = [
     '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', 
@@ -96,8 +116,64 @@ const Index = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Helper function to update current sheet data
-  const updateCurrentSheetData = (updates: Partial<SheetData>) => {
+  // Keyboard shortcuts for undo/redo
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Check for Ctrl+Z (undo)
+      if (e.ctrlKey && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        ribbonActions.undo();
+      }
+      // Check for Ctrl+Y or Ctrl+Shift+Z (redo)
+      else if ((e.ctrlKey && e.key === 'y') || (e.ctrlKey && e.shiftKey && e.key === 'z')) {
+        e.preventDefault();
+        ribbonActions.redo();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [history, historyIndex, activeSheetId, sheetDataMap]); // Dependencies for undo/redo
+
+  // Helper function to update current sheet data with history tracking
+  const updateCurrentSheetData = (updates: Partial<SheetData>, addToHistory: boolean = true) => {
+    // Save current state to history before updating
+    if (addToHistory) {
+      const currentData = sheetDataMap[activeSheetId];
+      if (currentData) {
+        const historyEntry: HistoryEntry = {
+          cellData: { ...currentData.cellData },
+          selectedCell: currentData.selectedCell,
+          selectedCellValue: currentData.selectedCellValue,
+          timestamp: Date.now()
+        };
+        
+        setHistory(prev => {
+          const sheetHistory = prev[activeSheetId] || [];
+          const currentIndex = historyIndex[activeSheetId] ?? -1;
+          
+          // Remove any history after current index (when making a new change after undo)
+          const newHistory = sheetHistory.slice(0, currentIndex + 1);
+          newHistory.push(historyEntry);
+          
+          // Limit history size
+          if (newHistory.length > maxHistorySize) {
+            newHistory.shift();
+          }
+          
+          return {
+            ...prev,
+            [activeSheetId]: newHistory
+          };
+        });
+        
+        setHistoryIndex(prev => ({
+          ...prev,
+          [activeSheetId]: Math.min((prev[activeSheetId] ?? -1) + 1, maxHistorySize - 1)
+        }));
+      }
+    }
+    
     setSheetDataMap(prev => ({
       ...prev,
       [activeSheetId]: {
@@ -577,15 +653,48 @@ const Index = () => {
       updateCurrentSheetData({ cellData: newCellData });
     },
 
-    // Undo/Redo (basic implementation for now)
+    // Undo/Redo functionality
     undo: () => {
-      // TODO: Implement proper undo/redo with history stack
-      console.log('Undo functionality needs implementation');
+      const sheetHistory = history[activeSheetId] || [];
+      const currentIndex = historyIndex[activeSheetId] ?? -1;
+      
+      if (currentIndex >= 0 && sheetHistory[currentIndex]) {
+        // Restore from history
+        const historyEntry = sheetHistory[currentIndex];
+        updateCurrentSheetData({
+          cellData: { ...historyEntry.cellData },
+          selectedCell: historyEntry.selectedCell,
+          selectedCellValue: historyEntry.selectedCellValue
+        }, false); // Don't add to history when undoing
+        
+        // Move history index back
+        setHistoryIndex(prev => ({
+          ...prev,
+          [activeSheetId]: Math.max(-1, currentIndex - 1)
+        }));
+      }
     },
 
     redo: () => {
-      // TODO: Implement proper undo/redo with history stack
-      console.log('Redo functionality needs implementation');
+      const sheetHistory = history[activeSheetId] || [];
+      const currentIndex = historyIndex[activeSheetId] ?? -1;
+      const nextIndex = currentIndex + 2; // +2 because we need to go forward from current
+      
+      if (nextIndex < sheetHistory.length && sheetHistory[nextIndex]) {
+        // Restore from history
+        const historyEntry = sheetHistory[nextIndex];
+        updateCurrentSheetData({
+          cellData: { ...historyEntry.cellData },
+          selectedCell: historyEntry.selectedCell,
+          selectedCellValue: historyEntry.selectedCellValue
+        }, false); // Don't add to history when redoing
+        
+        // Move history index forward
+        setHistoryIndex(prev => ({
+          ...prev,
+          [activeSheetId]: nextIndex
+        }));
+      }
     }
   };
 

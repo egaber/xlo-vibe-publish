@@ -9,6 +9,21 @@ In ExcelGrid.tsx, the `handleKeyDown` function was setting the initial character
 ### Solution
 Added `e.preventDefault()` to prevent the default browser behavior and stop the character from being processed twice when initiating cell editing.
 
+## Recent Implementations (9/8/2025)
+
+### ✅ Undo/Redo System
+- **COMPLETED**: Full undo/redo functionality with history stack
+- **COMPLETED**: Keyboard shortcuts (Ctrl+Z for undo, Ctrl+Y or Ctrl+Shift+Z for redo)
+- **COMPLETED**: Per-sheet history tracking (separate history for each sheet)
+- **COMPLETED**: History limit of 50 entries to prevent memory issues
+- **COMPLETED**: Smart history management (clears forward history when making new changes after undo)
+
+### ✅ Gridline Hiding for Colored Cells
+- **COMPLETED**: Adjacent cells with same background color now hide borders between them
+- **COMPLETED**: Creates seamless colored regions when multiple cells have the same background
+- **COMPLETED**: Only applies to cells with actual background colors (not white/transparent)
+- **COMPLETED**: Works correctly with selection borders and other cell features
+
 ## Accomplished Tasks ✅
 Successfully made all major ribbon buttons functional with real Excel-like commands:
 
@@ -44,6 +59,8 @@ Successfully made all major ribbon buttons functional with real Excel-like comma
 - **COMPLETED**: All ribbon buttons connected to functional actions
 - **COMPLETED**: Selection-based operations working correctly
 - **COMPLETED**: Real-time cell formatting and display updates
+- **COMPLETED**: Undo/redo system with keyboard shortcuts
+- **COMPLETED**: Gridline hiding for colored regions
 
 ## Implementation Details
 
@@ -52,6 +69,7 @@ Successfully made all major ribbon buttons functional with real Excel-like comma
 2. **Utility Functions**: Cell formatting and clipboard utilities in `/utils/cellFormatting.ts`
 3. **State Management**: Centralized in Index.tsx with ribbon actions interface
 4. **Component Integration**: ExcelRibbon receives and executes formatting actions
+5. **History Management**: Per-sheet undo/redo stacks with smart state tracking
 
 ### Key Features Working
 - ✅ **Copy/Cut/Paste**: Full clipboard functionality with range support
@@ -61,17 +79,35 @@ Successfully made all major ribbon buttons functional with real Excel-like comma
 - ✅ **Number Formats**: Currency, percentage, accounting, decimal controls
 - ✅ **Selection Integration**: All actions work on current selection
 - ✅ **Visual Feedback**: Formatting changes visible immediately in cells
+- ✅ **Undo/Redo**: Full history with Ctrl+Z/Ctrl+Y shortcuts
+- ✅ **Smart Gridlines**: Automatic hiding between same-colored cells
 
-### Status: MISSION ACCOMPLISHED 🎉
-The Excel clone now has a fully functional ribbon interface with real formatting commands that work exactly like Excel. Users can:
-- Format text (bold, italic, underline, fonts, colors)
-- Align content (all directions)
-- Format numbers (currency, percentage, decimals)
-- Copy/paste with formatting preservation
-- Apply formatting to single cells or ranges
+### Technical Implementation Notes
+
+#### Undo/Redo System
+- Maintains separate history for each sheet
+- Stores complete snapshots of cell data, selection, and formula bar state
+- Automatically clears forward history when making changes after undo
+- Limited to 50 entries per sheet to prevent memory issues
+- Keyboard shortcuts properly integrated with preventDefault()
+
+#### Gridline Hiding Algorithm
+- Checks adjacent cells (right and bottom) for matching background colors
+- Only applies to cells with actual colors (not white/transparent)
+- Sets border colors to transparent for seamless appearance
+- Preserves selection borders and other visual features
+
+### Status: FULLY FUNCTIONAL EXCEL CLONE 🎉
+The Excel clone now has:
+- Fully functional ribbon interface with real formatting commands
+- Complete undo/redo system with keyboard shortcuts
+- Smart gridline handling for professional appearance
+- All core Excel-like features working smoothly
 
 Next potential enhancements:
-- Undo/redo system with history stack
-- Borders and advanced styling
+- Borders and advanced styling options
 - Conditional formatting features
-- Keyboard shortcuts (Ctrl+B, Ctrl+I, etc.)
+- More keyboard shortcuts (Ctrl+B, Ctrl+I, Ctrl+C, etc.)
+- Cell merging functionality
+- Find and replace
+- Sorting and filtering

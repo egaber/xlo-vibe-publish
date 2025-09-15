@@ -639,6 +639,33 @@ export const ExcelGrid = ({
                 }
               }
               
+              // Check adjacent cells for same background color to hide borders
+              const currentBgColor = cellInfo.format?.backgroundColor;
+              const hasColoredBackground = currentBgColor && currentBgColor !== 'transparent' && currentBgColor !== '#ffffff';
+              
+              let hideBorderRight = false;
+              let hideBorderBottom = false;
+              
+              if (hasColoredBackground) {
+                // Check right cell
+                if (colIndex < GRID_COLS - 1) {
+                  const rightCellRef = getCellRef(rowIndex, colIndex + 1);
+                  const rightCellInfo = cellData[rightCellRef];
+                  if (rightCellInfo?.format?.backgroundColor === currentBgColor) {
+                    hideBorderRight = true;
+                  }
+                }
+                
+                // Check bottom cell  
+                if (rowIndex < GRID_ROWS - 1) {
+                  const bottomCellRef = getCellRef(rowIndex + 1, colIndex);
+                  const bottomCellInfo = cellData[bottomCellRef];
+                  if (bottomCellInfo?.format?.backgroundColor === currentBgColor) {
+                    hideBorderBottom = true;
+                  }
+                }
+              }
+              
               // Determine background color and styles
               let bgColor = 'bg-white hover:bg-gray-50';
               let cellStyle: React.CSSProperties = { ...cellStyles };
@@ -677,12 +704,22 @@ export const ExcelGrid = ({
 
               const renderCellWidth = columnWidths[colIndex] || DEFAULT_COLUMN_WIDTH;
               
+              // Build border style based on adjacent cells
+              const borderStyle: React.CSSProperties = {};
+              if (hideBorderRight) {
+                borderStyle.borderRightColor = 'transparent';
+              }
+              if (hideBorderBottom) {
+                borderStyle.borderBottomColor = 'transparent';
+              }
+              
               return (
                 <div
                   key={colIndex}
                   className={`h-6 border-r border-b border-gray-300 relative cursor-cell select-none ${bgColor} ${rangeBorders}`}
                   style={{ 
                     ...cellStyle,
+                    ...borderStyle,
                     width: `${renderCellWidth}px`,
                     minWidth: `${renderCellWidth}px`,
                     flexShrink: 0
