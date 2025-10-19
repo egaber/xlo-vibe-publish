@@ -1,6 +1,8 @@
 # Welcome to XLO Vibe Coding 
+<img width="1880" height="1012" alt="image" src="https://github.com/user-attachments/assets/f3bdcd07-bc5a-4317-80fe-9cb9ada803fc" />
+* This is not Excel Online! but you can get whatever features you want in there :)
 
-## How can I edit this code?
+* ## How can I edit this code?
 
 ```sh
 # Step 1: Clone the repository using the project's Git URL.
